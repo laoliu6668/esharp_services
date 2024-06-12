@@ -1,4 +1,4 @@
-module esharpe_services
+module github.com/laoliu6668/esharp_services
 
 go 1.22.3
 
