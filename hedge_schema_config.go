@@ -56,12 +56,12 @@ func (c *HedgeSchemaConfig) RdsName() string {
 }
 
 func (c *HedgeSchemaConfig) Keys() ([]string, error) {
-	return redisDB_H.Keys(context.Background(), "").Result()
+	return redisDB_H.Keys(context.Background(), "*").Result()
 }
 func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model string) (id string, err error) {
 	has, err := c.Has(spot_exchange, swap_exchange, symbol)
 	if err != nil {
-		return
+		return "", err
 	}
 	if has {
 		return "", errors.New("already exists")
@@ -104,6 +104,19 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 	c.SetInt(id, "max_open_order_volume", SwapSymbolitem.MaxOpenOrderVolume)
 	c.SetInt(id, "max_close_order_volume", SwapSymbolitem.MaxCloseOrderVolume)
 
+	// default value
+	c.SetBool(id, "status", false)
+	c.SetFloat(id, "opend_rate", 0)
+	c.SetFloat(id, "close_rate", 0)
+	c.SetInt(id, "single_order_volume", 0)
+	c.SetInt(id, "position_volume_limit", 0)
+	c.SetFloat(id, "spot_volume", 0)
+	c.SetFloat(id, "spot_cost", 0)
+	c.SetInt(id, "swap_volume", 0)
+	c.SetFloat(id, "swap_cost", 0)
+	c.SetFloat(id, "rel_opend_rate", 0)
+	c.SetFloat(id, "rel_close_rate", 0)
+	c.SetFloat(id, "rel_pl", 0)
 	return
 }
 
@@ -123,7 +136,7 @@ func (c *HedgeSchemaConfig) Vals() (allVals []HedgeSchemaItem, err error) {
 func (c *HedgeSchemaConfig) Has(spot_exchange string, swap_exchange string, symbol string) (has bool, err error) {
 	list, err := c.Vals()
 	if err != nil {
-		return
+		return false, err
 	}
 	for _, v := range list {
 		if v.SpotExchange == spot_exchange && v.SwapExchange == swap_exchange && v.Symbol == symbol {
