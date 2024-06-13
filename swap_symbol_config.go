@@ -9,10 +9,10 @@ import (
 type SwapSymbolItem struct {
 	Symbol                string  `json:"symbol"`                   // 币对
 	ContractSize          float64 `json:"contract_size"`            // 合约面值
-	MaxBuyPositionVolume  float64 `json:"max_buy_position_volume"`  // 多仓持仓上限(张)
-	MaxSellPositionVolume float64 `json:"max_sell_position_volume"` // 空仓持仓上限(张)
-	MaxOpenOrderVolume    float64 `json:"max_open_order_volume"`    // 开仓单笔下单上限(张)
-	MaxCloseOrderVolume   float64 `json:"max_close_order_volume"`   // 平仓单笔下单上限(张)
+	MaxBuyPositionVolume  int64   `json:"max_buy_position_volume"`  // 多仓持仓上限(张)
+	MaxSellPositionVolume int64   `json:"max_sell_position_volume"` // 空仓持仓上限(张)
+	MaxOpenOrderVolume    int64   `json:"max_open_order_volume"`    // 开仓单笔下单上限(张)
+	MaxCloseOrderVolume   int64   `json:"max_close_order_volume"`   // 平仓单笔下单上限(张)
 }
 
 type SwapSymbolConfig struct {

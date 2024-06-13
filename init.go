@@ -9,9 +9,11 @@ const (
 )
 
 var redisDB *redis.Client
+var redisDB_H *redis.Client
 
-func Init(db *redis.Client) {
+func Init(db *redis.Client, db2 *redis.Client) {
 	redisDB = db
+	redisDB_H = db2
 	// InitHtxUtil()
 }
 

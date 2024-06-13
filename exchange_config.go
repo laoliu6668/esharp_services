@@ -76,7 +76,6 @@ func (c *ExchangeConfig) GetString(key string) (value string, err error) {
 }
 
 func (c *ExchangeConfig) Set(key string, value any) (err error) {
-	fmt.Printf("value: %s\n", value)
 	buf, err := json.Marshal(value)
 	if err != nil {
 		return
