@@ -26,7 +26,7 @@ var SwapBalanceConfigExample = SwapBalanceConfig{
 }
 
 func (c *SwapBalanceConfig) RdsName() string {
-	return fmt.Sprintf("%s_spot_balance", c.Exchange)
+	return fmt.Sprintf("%s_swap_balance", c.Exchange)
 }
 
 func (c *SwapBalanceConfig) Init() (err error) {
