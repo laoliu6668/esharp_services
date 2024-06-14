@@ -81,7 +81,7 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 	c.Set(id, "symbol", symbol)
 	c.Set(id, "spot_exchange", spot_exchange)
 	c.Set(id, "swap_exchange", swap_exchange)
-	c.Set(id, "model", model)
+	c.Set(id, "models", model)
 
 	spotSymbolItem, err := (&SpotSymbolConfig{
 		Exchange: spot_exchange,
@@ -242,6 +242,25 @@ func (c *HedgeSchemaConfig) SetFloat(orderId, field string, value float64) (err 
 }
 func (c *HedgeSchemaConfig) SetBool(orderId, field string, value bool) (err error) {
 	return c.Set(orderId, field, boolTo(value))
+}
+
+// 运行中的方案不允许被删除，有期货持仓量的不能被删除
+func (c *HedgeSchemaConfig) Del(orderId string) (err error) {
+	item, err := c.Get(orderId)
+	if err != nil {
+		return err
+	}
+	if item.Status {
+		return fmt.Errorf("running schema can't be deleted: %s", orderId)
+	}
+	if item.SwapVolume > 0 {
+		return fmt.Errorf("position volume limit schema can't be deleted: %s", orderId)
+	}
+	err = redisDB_H.Del(context.Background(), orderId).Err()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func toInt(val string) int64 {
