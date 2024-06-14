@@ -15,8 +15,11 @@ const (
 )
 
 type HedgeSchemaItem struct {
-	Id           string `json:"id"`            //  方案编号
-	Status       bool   `json:"status"`        //  运行状态: on-运行中 off-已停止
+	Id     string `json:"id"`     //  方案编号
+	Status bool   `json:"status"` //  运行状态: on-运行中 off-已停止
+
+	OpendLock    bool   `json:"open_lock"`     // 开仓行为锁: on-锁定 off-解锁
+	CloseLock    bool   `json:"close_lock"`    // 平仓行为锁: on-锁定 off-解锁
 	Symbol       string `json:"symbol"`        // c 对冲币对
 	SpotExchange string `json:"spot_exchange"` // c 现货交易所
 	SwapExchange string `json:"swap_exchange"` // c 期货交易所
@@ -106,6 +109,8 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 
 	// default value
 	c.SetBool(id, "status", false)
+	c.SetBool(id, "open_lock", false)
+	c.SetBool(id, "close_lock", false)
 	c.SetFloat(id, "opend_rate", 0)
 	c.SetFloat(id, "close_rate", 0)
 	c.SetInt(id, "single_order_volume", 0)
