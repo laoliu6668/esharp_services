@@ -17,8 +17,8 @@ type HedgeOrderConfig struct {
 var HedgeOrderExample = BaseConfig{
 	ExchangeName: "htx",
 	RdsData: map[string]string{
-		"SP1x378f": "",
-		"SW2fdwds": "",
+		"SP1x378f": "SW2fdwds",
+		"SP12558f": "SW2fdaeds",
 	},
 }
 

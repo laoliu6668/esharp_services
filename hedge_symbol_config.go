@@ -7,16 +7,21 @@ import (
 )
 
 type HedgeSymbolConfig struct {
-	Exchange string              `json:"exchange"`
-	RdsData  map[string][]string `json:"rds_data"`
+	Exchange string           `json:"exchange"`
+	RdsData  HedgeSymbolDatas `json:"rds_data"`
+}
+
+type HedgeSymbolDatas struct {
+	Spot []string `json:"spot"`
+	Swap []string `json:"swap"`
 }
 
 // example
 var HedgeSymbolConfigExample = HedgeSymbolConfig{
 	Exchange: "htx",
-	RdsData: map[string][]string{
-		"spot": {"BTC", "ETH"},
-		"swap": {"ETH", "DOT", "LINK"},
+	RdsData: HedgeSymbolDatas{
+		Spot: []string{"BTC", "ETH"},
+		Swap: []string{"ETH", "DOT", "LINK"},
 	},
 }
 
@@ -25,28 +30,17 @@ func (c *HedgeSymbolConfig) RdsName() string {
 }
 
 func (c *HedgeSymbolConfig) Init() (err error) {
-	for k, v := range c.RdsData {
-		err = c.Set(k, v)
-		if err != nil {
-			return
-		}
+	err = c.SetSpot(c.RdsData.Spot)
+	if err != nil {
+		return
+	}
+	err = c.SetSwap(c.RdsData.Swap)
+	if err != nil {
+		return
 	}
 	return nil
 }
 
-func (c *HedgeSymbolConfig) GetAll() (all map[string][]string, err error) {
-	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
-	if err != nil {
-		return
-	}
-	all = map[string][]string{}
-	for k, v := range res {
-		item := []string{}
-		json.Unmarshal([]byte(v), &item)
-		all[k] = item
-	}
-	return all, err
-}
 func (c *HedgeSymbolConfig) GetSpot() (all []string, err error) {
 	return c.Get("spot")
 }
