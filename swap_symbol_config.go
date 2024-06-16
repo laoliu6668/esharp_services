@@ -29,7 +29,7 @@ var SwapSymbolConfigExample = SwapSymbolConfig{
 }
 
 func (c *SwapSymbolConfig) RdsName() string {
-	return fmt.Sprintf("%s_swap_symbol", c.Exchange)
+	return fmt.Sprintf("%s_swap_symbol_config", c.Exchange)
 }
 
 func (c *SwapSymbolConfig) Init() (err error) {

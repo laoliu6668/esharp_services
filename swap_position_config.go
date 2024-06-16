@@ -27,7 +27,7 @@ var SwapPositionConfigExample = SwapPositionConfig{
 }
 
 func (c *SwapPositionConfig) RdsName() string {
-	return fmt.Sprintf("%s_swap_funding_rate", c.Exchange)
+	return fmt.Sprintf("%s_swap_funding_rate_config", c.Exchange)
 }
 
 func (c *SwapPositionConfig) Init() (err error) {

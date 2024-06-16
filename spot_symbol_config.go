@@ -30,7 +30,7 @@ var SpotSymbolConfigExample = SpotSymbolConfig{
 }
 
 func (c *SpotSymbolConfig) RdsName() string {
-	return fmt.Sprintf("%s_spot_symbol", c.Exchange)
+	return fmt.Sprintf("%s_spot_symbol_config", c.Exchange)
 }
 
 func (c *SpotSymbolConfig) Init() (err error) {

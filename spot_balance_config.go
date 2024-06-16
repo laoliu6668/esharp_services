@@ -27,7 +27,7 @@ var SpotBalanceConfigExample = SpotBalanceConfig{
 }
 
 func (c *SpotBalanceConfig) RdsName() string {
-	return fmt.Sprintf("%s_spot_balance", c.Exchange)
+	return fmt.Sprintf("%s_spot_balance_config", c.Exchange)
 }
 
 func (c *SpotBalanceConfig) Init() (err error) {
