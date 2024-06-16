@@ -39,7 +39,7 @@ func (c *HedgeTickerConfig) RdsName() string {
 	return "hedge_ticker"
 }
 func (c *HedgeTickerConfig) MQName() string {
-	return fmt.Sprintf("%s_%s_hedge_ticker", c.SpotExchange, c.SwapExchange)
+	return fmt.Sprintf("%s_%s_hedge_ticker_config", c.SpotExchange, c.SwapExchange)
 }
 func (c *HedgeTickerConfig) RdsHKey(spotExchange, swapExchange, symbol string) string {
 	return fmt.Sprintf("%s_%s_%s", spotExchange, swapExchange, symbol)
