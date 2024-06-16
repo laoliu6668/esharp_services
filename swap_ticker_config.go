@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
-	"github.com/laoliu6668/esharp_services/util"
 )
 
+type Values struct {
+	Price float64 `json:"price"`
+	Size  float64 `json:"size"`
+}
 type Ticker struct {
 	Exchange string  `json:"exchange"`
 	Symbol   string  `json:"symbol"`
@@ -16,29 +18,25 @@ type Ticker struct {
 	UpdateAt float64 `json:"update_at"`
 }
 
-type Values struct {
-	Price float64 `json:"price"`
-	Size  float64 `json:"size"`
-}
 type SwapTickerConfig struct {
-	Exchange string         `json:"exchange"`
-	RdsData  map[string]any `json:"rds_data"`
+	Exchange string            `json:"exchange"`
+	RdsData  map[string]Ticker `json:"rds_data"`
 }
 
 // example
 var SwapTickerConfigExample = SwapTickerConfig{
 	Exchange: "htx",
-	RdsData: map[string]any{
-		"BTC": map[string]any{
-			"platform": "htx",
-			"symbol":   "BTC",
-			"buy": map[string]any{
-				"price": "67777.15",
-				"size":  "1.08",
+	RdsData: map[string]Ticker{
+		"BTC": {
+			Exchange: "htx",
+			Symbol:   "BTC",
+			Buy: Values{
+				Price: 67777.15,
+				Size:  1.08,
 			},
-			"sell": map[string]any{
-				"price":  "67778.28",
-				"amount": "1.08",
+			Sell: Values{
+				Price: 67778.28,
+				Size:  1.08,
 			},
 		},
 	},
@@ -58,21 +56,24 @@ func (c *SwapTickerConfig) Init() (err error) {
 	return nil
 }
 
-func (c *SwapTickerConfig) GetAll() (all map[string]map[string]any, err error) {
+func (c *SwapTickerConfig) GetAll() (all map[string]Ticker, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
 	}
-	all = map[string]map[string]any{}
+	all = map[string]Ticker{}
 	for k, v := range res {
-		mp, err1 := util.JsonDecodeNumber(v)
-		if err1 != nil {
-			err = err1
-			return all, err
+		item := Ticker{}
+		err = json.Unmarshal([]byte(v), &item)
+		if err != nil {
+			return
 		}
-		all[k] = mp
+		all[k] = item
 	}
 	return all, err
+}
+func (c *SwapTickerConfig) Keys() (keys []string, err error) {
+	return redisDB.HKeys(context.Background(), c.RdsName()).Result()
 }
 func (c *SwapTickerConfig) Has(key string) (has bool, err error) {
 	has, err = redisDB.HExists(context.Background(), c.RdsName(), key).Result()
@@ -88,7 +89,7 @@ func (c *SwapTickerConfig) Get(key string) (value Ticker, err error) {
 	return
 }
 
-func (c *SwapTickerConfig) Set(key string, value any) (err error) {
+func (c *SwapTickerConfig) Set(key string, value Ticker) (err error) {
 	buf, err := json.Marshal(value)
 	if err != nil {
 		return

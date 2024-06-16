@@ -42,13 +42,15 @@ type HedgeSchemaItem struct {
 	CloseRate           float64 `json:"close_rate"`            // * 平仓差率
 	SingleOrderVolume   int64   `json:"single_order_volume"`   // * 期货订单单笔张数(张)
 	PositionVolumeLimit int64   `json:"position_volume_limit"` // * 期货仓位持仓上限(张)
-	SpotVolume          float64 `json:"spot_volume"`           // 现货持币数量
-	SpotCost            float64 `json:"spot_cost"`             // 现货持币花费(USDT)
-	SwapVolume          int64   `json:"swap_volume"`           // 期货持仓数量(张)
-	SwapCost            float64 `json:"swap_cost"`             // 期货持仓花费(USDT)
-	RelOpendRate        float64 `json:"rel_opend_rate"`        // 实开差率
-	RelCloseRate        float64 `json:"rel_close_rate"`        // 实平差率
-	RelPl               float64 `json:"rel_pl"`                // 实际盈亏
+
+	SpotVolume float64 `json:"spot_volume"` // 现货持币数量
+	SpotCost   float64 `json:"spot_cost"`   // 现货持币花费(USDT)
+	SwapVolume int64   `json:"swap_volume"` // 期货持仓数量(张)
+	SwapCost   float64 `json:"swap_cost"`   // 期货持仓花费(USDT)
+
+	RelOpendRate float64 `json:"rel_opend_rate"` // 实开差率
+	RelCloseRate float64 `json:"rel_close_rate"` // 实平差率
+	RelPl        float64 `json:"rel_pl"`         // 实际盈亏
 }
 
 type HedgeSchemaConfig struct {
@@ -62,7 +64,7 @@ func (c *HedgeSchemaConfig) Keys() ([]string, error) {
 	return redisDB_H.Keys(context.Background(), "*").Result()
 }
 func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model string) (id string, err error) {
-	has, err := c.Has(spot_exchange, swap_exchange, symbol)
+	has, err := c.HasSameExSymbol(swap_exchange, symbol)
 	if err != nil {
 		return "", err
 	}
@@ -113,8 +115,8 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 	c.SetBool(id, "close_lock", false)
 	c.SetFloat(id, "opend_rate", 0)
 	c.SetFloat(id, "close_rate", 0)
-	c.SetInt(id, "single_order_volume", 0)
-	c.SetInt(id, "position_volume_limit", 0)
+	c.SetInt(id, "single_order_volume", 2)
+	c.SetInt(id, "position_volume_limit", 1000)
 	c.SetFloat(id, "spot_volume", 0)
 	c.SetFloat(id, "spot_cost", 0)
 	c.SetInt(id, "swap_volume", 0)
@@ -136,6 +138,23 @@ func (c *HedgeSchemaConfig) Vals() (allVals []HedgeSchemaItem, err error) {
 		allVals = append(allVals, value)
 	}
 	return
+}
+
+// 是否存在同交易所币对
+func (c *HedgeSchemaConfig) HasSameExSymbol(swap_exchange string, symbol string) (has bool, err error) {
+	list, err := c.Vals()
+	if err != nil {
+		return false, err
+	}
+	for _, v := range list {
+		if v.SwapExchange == swap_exchange && v.Symbol == symbol {
+			return true, nil
+		}
+		if v.SpotExchange == swap_exchange && v.Symbol == symbol {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func (c *HedgeSchemaConfig) Has(spot_exchange string, swap_exchange string, symbol string) (has bool, err error) {

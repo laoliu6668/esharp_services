@@ -6,30 +6,33 @@ import (
 	"fmt"
 )
 
-type SwapBalanceConfig struct {
+type SwapAccountConfig struct {
 	Exchange string                     `json:"exchange"`
-	RdsData  map[string]SwapBalanceItem `json:"rds_data"`
+	RdsData  map[string]SwapAccountItem `json:"rds_data"`
 }
 
-type SwapBalanceItem struct {
-	LockBalance float64 `json:"lock_balance"`
-	FreeBalance float64 `json:"free_balance"`
+type SwapAccountItem struct {
 	Symbol      string  `json:"symbol"`
+	FreeBalance float64 `json:"free_balance"`
+	LockBalance float64 `json:"lock_balance"`
+	LiquidPrice float64 `json:"liquid_price"` // 强平价格
+	MarginRatio float64 `json:"margin_ratio"` // 保证金率
+	UpdateAt    int64   `json:"update_at"`
 }
 
 // example
-var SwapBalanceConfigExample = SwapBalanceConfig{
+var SwapAccountConfigExample = SwapAccountConfig{
 	Exchange: "htx",
-	RdsData: map[string]SwapBalanceItem{
+	RdsData: map[string]SwapAccountItem{
 		"BTC": {},
 	},
 }
 
-func (c *SwapBalanceConfig) RdsName() string {
+func (c *SwapAccountConfig) RdsName() string {
 	return fmt.Sprintf("%s_swap_balance", c.Exchange)
 }
 
-func (c *SwapBalanceConfig) Init() (err error) {
+func (c *SwapAccountConfig) Init() (err error) {
 	for k, v := range c.RdsData {
 		err = c.Set(k, v)
 		if err != nil {
@@ -39,24 +42,24 @@ func (c *SwapBalanceConfig) Init() (err error) {
 	return nil
 }
 
-func (c *SwapBalanceConfig) GetAll() (all map[string]SwapBalanceItem, err error) {
+func (c *SwapAccountConfig) GetAll() (all map[string]SwapAccountItem, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
 	}
-	all = map[string]SwapBalanceItem{}
+	all = map[string]SwapAccountItem{}
 	for k, v := range res {
-		item := SwapBalanceItem{}
+		item := SwapAccountItem{}
 		json.Unmarshal([]byte(v), &item)
 		all[k] = item
 	}
 	return all, err
 }
-func (c *SwapBalanceConfig) Has(key string) (has bool, err error) {
+func (c *SwapAccountConfig) Has(key string) (has bool, err error) {
 	has, err = redisDB.HExists(context.Background(), c.RdsName(), key).Result()
 	return
 }
-func (c *SwapBalanceConfig) Get(key string) (value SwapBalanceItem, err error) {
+func (c *SwapAccountConfig) Get(key string) (value SwapAccountItem, err error) {
 	ret, err1 := redisDB.HGet(context.Background(), c.RdsName(), key).Result()
 	if err1 != nil {
 		err = err1
@@ -65,23 +68,23 @@ func (c *SwapBalanceConfig) Get(key string) (value SwapBalanceItem, err error) {
 	err = json.Unmarshal([]byte(ret), &value)
 	return
 }
-func (c *SwapBalanceConfig) Keys() (keys []string, err error) {
+func (c *SwapAccountConfig) Keys() (keys []string, err error) {
 	return redisDB.HKeys(context.Background(), c.RdsName()).Result()
 }
-func (c *SwapBalanceConfig) Vals() (vals []SwapBalanceItem, err error) {
+func (c *SwapAccountConfig) Vals() (vals []SwapAccountItem, err error) {
 	strList, err := redisDB.HVals(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
 	}
-	vals = []SwapBalanceItem{}
+	vals = []SwapAccountItem{}
 	for _, str := range strList {
-		item := SwapBalanceItem{}
+		item := SwapAccountItem{}
 		json.Unmarshal([]byte(str), &item)
 		vals = append(vals, item)
 	}
 	return
 }
-func (c *SwapBalanceConfig) Set(key string, value SwapBalanceItem) (err error) {
+func (c *SwapAccountConfig) Set(key string, value SwapAccountItem) (err error) {
 	buf, err := json.Marshal(value)
 	if err != nil {
 		return
@@ -92,7 +95,7 @@ func (c *SwapBalanceConfig) Set(key string, value SwapBalanceItem) (err error) {
 	}
 	return nil
 }
-func (c *SwapBalanceConfig) SetFreeBalance(key string, amount float64) (err error) {
+func (c *SwapAccountConfig) SetFreeBalance(key string, amount float64) (err error) {
 
 	vals, err := c.Get(key)
 	if err != nil {
