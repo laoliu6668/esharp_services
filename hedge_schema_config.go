@@ -43,10 +43,15 @@ type HedgeSchemaItem struct {
 	SingleOrderVolume   int64   `json:"single_order_volume"`   // * 期货订单单笔张数(张)
 	PositionVolumeLimit int64   `json:"position_volume_limit"` // * 期货仓位持仓上限(张)
 
-	SpotVolume float64 `json:"spot_volume"` // 现货持币数量
-	SpotCost   float64 `json:"spot_cost"`   // 现货持币花费(USDT)
-	SwapVolume int64   `json:"swap_volume"` // 期货持仓数量(张)
-	SwapCost   float64 `json:"swap_cost"`   // 期货持仓花费(USDT)
+	SpotTotalBuyVolume  float64 `json:"spot_total_buy_volume"`  // 现货累积买入数量
+	SpotTotalBuyValue   float64 `json:"spot_total_buy_value"`   // 现货累积买入花费
+	SpotTotalSellVolume float64 `json:"spot_total_sell_volume"` // 现货累积卖出数量
+	SpotTotalSellValue  float64 `json:"spot_total_sell_value"`  // 现货累积卖出金额
+
+	SwapTotalOpenVolume  int64   `json:"swap_total_open_volume"`  // 期货累积开多张数
+	SwapTotalOpenValue   float64 `json:"swap_total_open_value"`   // 期货累积开多花费
+	SwapTotalCloseVolume int64   `json:"swap_total_close_volume"` // 期货累积开空张数
+	SwapTotalCloseValue  float64 `json:"swap_total_close_value"`  // 期货累积开空金额
 
 	RelOpendRate float64 `json:"rel_opend_rate"` // 实开差率
 	RelCloseRate float64 `json:"rel_close_rate"` // 实平差率
@@ -218,14 +223,22 @@ func (c *HedgeSchemaConfig) Get(OrderId string) (item HedgeSchemaItem, err error
 			item.SingleOrderVolume = toInt(v)
 		case "position_volume_limit":
 			item.PositionVolumeLimit = toInt(v)
-		case "spot_volume":
-			item.SpotVolume = toFloat(v)
-		case "spot_cost":
-			item.SpotCost = toFloat(v)
-		case "swap_volume":
-			item.SwapVolume = toInt(v)
-		case "swap_cost":
-			item.SwapCost = toFloat(v)
+		case "spot_total_buy_volume":
+			item.SpotTotalBuyVolume = toFloat(v)
+		case "spot_total_buy_value":
+			item.SpotTotalBuyValue = toFloat(v)
+		case "spot_total_sell_volume":
+			item.SpotTotalSellVolume = toFloat(v)
+		case "spot_total_sell_value":
+			item.SpotTotalSellValue = toFloat(v)
+		case "swap_total_open_volume":
+			item.SwapTotalOpenVolume = toInt(v)
+		case "swap_total_open_value":
+			item.SwapTotalOpenValue = toFloat(v)
+		case "swap_total_close_volume":
+			item.SwapTotalCloseVolume = toInt(v)
+		case "swap_total_close_value":
+			item.SwapTotalCloseValue = toFloat(v)
 		case "rel_opend_rate":
 			item.RelOpendRate = toFloat(v)
 		case "rel_close_rate":
@@ -272,7 +285,22 @@ func (c *HedgeSchemaConfig) Del(orderId string) (err error) {
 	if item.Status {
 		return fmt.Errorf("running schema can't be deleted: %s", orderId)
 	}
-	if item.SwapVolume > 0 {
+	sp := SwapPositionConfig{
+		Exchange: item.SwapExchange,
+	}
+	swapPositionItem, err := sp.Get(item.Symbol)
+	if err != nil {
+		return fmt.Errorf("get swap position error: %s", err)
+	}
+	var position int64
+	if item.Models == SpotLessSwapMore {
+		position = swapPositionItem.BuyVolume
+	} else if item.Models == SpotMoreSwapLess {
+		position = swapPositionItem.SellVolume
+	} else {
+		return fmt.Errorf("schema models err: %s %s", orderId, item.Models)
+	}
+	if position > 0 {
 		return fmt.Errorf("position volume limit schema can't be deleted: %s", orderId)
 	}
 	err = redisDB_H.Del(context.Background(), orderId).Err()
