@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/laoliu6668/esharp_services/util"
 )
 
 const (
@@ -81,7 +79,7 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 	if model != SpotMoreSwapLess && model != SpotLessSwapMore {
 		return "", errors.New("model error")
 	}
-	id = util.GetUUID32()
+	id = rdsName
 
 	err = redisDB_H.HSet(context.Background(), rdsName, "id", id).Err()
 	if err != nil {

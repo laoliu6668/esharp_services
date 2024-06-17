@@ -18,3 +18,7 @@ func InitDB(db *redis.Client) {
 func InitDB_H(db *redis.Client) {
 	redisDB_H = db
 }
+
+func InitRabbitMq(s string) {
+	InitRabbitMq(s)
+}
