@@ -2,23 +2,33 @@ package esharp_services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 )
 
-// 对冲订单映射
+type HedgeOrderItem struct {
+	SpotExchange string `json:"spot_exchange"` // 现货交易所
+	SwapExchange string `json:"swap_exchange"` // 期货交易所
+	Symbol       string `json:"symbol"`        // 币对
+	SpotOrderId  string `json:"spot_order_id"` // 现货订单ID
+	SwapOrderId  string `json:"swap_order_id"` // 期货订单ID
+}
+
+// 对冲方案订单双向队列
 // 1.对冲交易端，下单后写入
-// 2.订阅现货订单成功后计算实开（平）差率及实际盈亏后删除
+// 2.队列消费时，要同时获取到现货期货订单才能消费，否则视为消费失败
+// 3.队列消费成功后出栈，删除订单表记录
+// 4.队列消费失败，重新尾部入栈
 type HedgeOrderConfig struct {
-	ExchangeName string            `json:"exchange_name"`
-	RdsData      map[string]string `json:"rds_data"`
+	ExchangeName string                    `json:"exchange_name"`
+	RdsData      map[string]HedgeOrderItem `json:"rds_data"`
 }
 
 // example
-var HedgeOrderExample = BaseConfig{
+var HedgeOrderExample = HedgeOrderConfig{
 	ExchangeName: "htx",
-	RdsData: map[string]string{
-		"SP1x378f": "SW2fdwds",
-		"SP12558f": "SW2fdaeds",
+	RdsData: map[string]HedgeOrderItem{
+		"DOT": {},
 	},
 }
 
@@ -38,18 +48,47 @@ func (c *HedgeOrderConfig) Init() (err error) {
 func (c *HedgeOrderConfig) Keys() (all []string, err error) {
 	return redisDB.HKeys(context.Background(), c.RdsName()).Result()
 }
-func (c *HedgeOrderConfig) GetAll() (all map[string]string, err error) {
-	return redisDB.HGetAll(context.Background(), c.RdsName()).Result()
+func (c *HedgeOrderConfig) GetAll() (all map[string]HedgeOrderItem, err error) {
+	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
+	if err != nil {
+		return
+	}
+	all = map[string]HedgeOrderItem{}
+	for k, v := range res {
+		item := HedgeOrderItem{}
+		json.Unmarshal([]byte(v), &item)
+		all[k] = item
+	}
+	return all, err
+}
+func (c *HedgeOrderConfig) Vals() (all []HedgeOrderItem, err error) {
+	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
+	if err != nil {
+		return
+	}
+	all = []HedgeOrderItem{}
+	for _, v := range res {
+		item := HedgeOrderItem{}
+		json.Unmarshal([]byte(v), &item)
+		all = append(all, item)
+	}
+	return all, err
 }
 func (c *HedgeOrderConfig) Has(key string) (has bool, err error) {
 	has, err = redisDB.HExists(context.Background(), c.RdsName(), key).Result()
 	return
 }
-func (c *HedgeOrderConfig) Get(key string) (ret string, err error) {
-	return redisDB.HGet(context.Background(), c.RdsName(), key).Result()
+func (c *HedgeOrderConfig) Get(key string) (value HedgeOrderItem, err error) {
+	ret, err1 := redisDB.HGet(context.Background(), c.RdsName(), key).Result()
+	if err1 != nil {
+		err = err1
+		return
+	}
+	err = json.Unmarshal([]byte(ret), &value)
+	return
 }
 
-func (c *HedgeOrderConfig) Set(key string, value string) (err error) {
+func (c *HedgeOrderConfig) Set(key string, value HedgeOrderItem) (err error) {
 	err = redisDB.HSet(context.Background(), c.RdsName(), key, value).Err()
 	if err != nil {
 		return
