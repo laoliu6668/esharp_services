@@ -15,7 +15,7 @@ type HedgeTickerItem struct {
 	Symbol       string   `json:"symbol"`
 	SpotExchange string   `json:"spot_exchange"`
 	SwapExchange string   `json:"swap_exchange"`
-	Opend        DiffRate `json:"opend"`
+	Open         DiffRate `json:"open"`
 	Close        DiffRate `json:"close"`
 	UpdateAt     float64  `json:"update_at"`
 }
