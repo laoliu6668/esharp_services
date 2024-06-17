@@ -10,7 +10,7 @@ type SwapPositionItem struct {
 	Symbol     string  `json:"symbol"`      // 币对
 	BuyVolume  float64 `json:"buy_volume"`  // 多仓持仓张数
 	SellVolume int64   `json:"sell_volume"` // 空仓持仓张数
-	UpdateAt   int64   `json:"update_at"`   // 更新时间 13位时间戳
+	UpdateAt   float64 `json:"update_at"`   // 更新时间 13位时间戳
 }
 
 type SwapPositionConfig struct {

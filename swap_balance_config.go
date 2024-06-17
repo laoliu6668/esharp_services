@@ -17,7 +17,7 @@ type SwapAccountItem struct {
 	LockBalance float64 `json:"lock_balance"`
 	LiquidPrice float64 `json:"liquid_price"` // 强平价格
 	MarginRatio float64 `json:"margin_ratio"` // 保证金率
-	UpdateAt    int64   `json:"update_at"`
+	UpdateAt    float64 `json:"update_at"`
 }
 
 // example

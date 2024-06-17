@@ -10,7 +10,7 @@ type SwapFundingRateItem struct {
 	Symbol      string  `json:"symbol"`       // 币对
 	FundingRate float64 `json:"funding_rate"` // 本期资金费率(%)
 	FundingTime int64   `json:"funding_time"` // 本期结算时间 13位时间戳
-	UpdateAt    int64   `json:"update_at"`    // 更新时间 13位时间戳
+	UpdateAt    float64 `json:"update_at"`    // 更新时间 13位时间戳
 }
 
 type SwapFundingConfig struct {
