@@ -12,10 +12,10 @@ type SpotBalanceConfig struct {
 }
 
 type SpotBalanceItem struct {
+	Exchange    string  `json:"exchange"`
+	Symbol      string  `json:"symbol"`
 	LockBalance float64 `json:"lock_balance"`
 	FreeBalance float64 `json:"free_balance"`
-	Symbol      string  `json:"symbol"`
-	Exchange    string  `json:"exchange"`
 	UpdateAt    float64 `json:"update_at"`
 }
 
@@ -84,6 +84,7 @@ func (c *SpotBalanceConfig) Vals() (vals []SpotBalanceItem, err error) {
 	return
 }
 func (c *SpotBalanceConfig) Set(key string, value SpotBalanceItem) (err error) {
+	value.Exchange = c.Exchange
 	buf, err := json.Marshal(value)
 	if err != nil {
 		return
@@ -101,10 +102,5 @@ func (c *SpotBalanceConfig) SetFreeBalance(key string, amount float64) (err erro
 		return
 	}
 	vals.FreeBalance = amount
-	buf, _ := json.Marshal(vals)
-	err = redisDB.HSet(context.Background(), c.RdsName(), key, string(buf)).Err()
-	if err != nil {
-		return
-	}
-	return nil
+	return c.Set(key, vals)
 }
