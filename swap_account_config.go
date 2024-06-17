@@ -12,6 +12,7 @@ type SwapAccountConfig struct {
 }
 
 type SwapAccountItem struct {
+	Exchange    string  `json:"exchange"`
 	Symbol      string  `json:"symbol"`
 	FreeBalance float64 `json:"free_balance"`
 	LockBalance float64 `json:"lock_balance"`
@@ -85,6 +86,7 @@ func (c *SwapAccountConfig) Vals() (vals []SwapAccountItem, err error) {
 	return
 }
 func (c *SwapAccountConfig) Set(key string, value SwapAccountItem) (err error) {
+	value.Exchange = c.Exchange
 	buf, err := json.Marshal(value)
 	if err != nil {
 		return
@@ -102,10 +104,5 @@ func (c *SwapAccountConfig) SetFreeBalance(key string, amount float64) (err erro
 		return
 	}
 	vals.FreeBalance = amount
-	buf, _ := json.Marshal(vals)
-	err = redisDB.HSet(context.Background(), c.RdsName(), key, string(buf)).Err()
-	if err != nil {
-		return
-	}
-	return nil
+	return c.Set(key, vals)
 }

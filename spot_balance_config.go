@@ -15,6 +15,7 @@ type SpotBalanceItem struct {
 	LockBalance float64 `json:"lock_balance"`
 	FreeBalance float64 `json:"free_balance"`
 	Symbol      string  `json:"symbol"`
+	Exchange    string  `json:"exchange"`
 	UpdateAt    float64 `json:"update_at"`
 }
 

@@ -7,6 +7,7 @@ import (
 )
 
 type SwapFundingRateItem struct {
+	Exchange    string  `json:"exchange"`
 	Symbol      string  `json:"symbol"`       // 币对
 	FundingRate float64 `json:"funding_rate"` // 本期资金费率(%)
 	FundingTime int64   `json:"funding_time"` // 本期结算时间 13位时间戳
@@ -85,6 +86,7 @@ func (c *SwapFundingConfig) Get(key string) (value SwapFundingRateItem, err erro
 }
 
 func (c *SwapFundingConfig) Set(key string, value SwapFundingRateItem) (err error) {
+	value.Exchange = c.Exchange
 	buf, err := json.Marshal(value)
 	if err != nil {
 		return

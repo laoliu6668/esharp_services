@@ -7,6 +7,7 @@ import (
 )
 
 type SwapPositionItem struct {
+	Exchange   string  `json:"exchange"`    // 交易所
 	Symbol     string  `json:"symbol"`      // 币对
 	BuyVolume  int64   `json:"buy_volume"`  // 多仓持仓张数
 	SellVolume int64   `json:"sell_volume"` // 空仓持仓张数
@@ -85,6 +86,7 @@ func (c *SwapPositionConfig) Get(key string) (value SwapPositionItem, err error)
 }
 
 func (c *SwapPositionConfig) Set(key string, value SwapPositionItem) (err error) {
+	value.Exchange = c.Exchange
 	buf, err := json.Marshal(value)
 	if err != nil {
 		return

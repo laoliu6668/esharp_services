@@ -69,7 +69,7 @@ func (c *HedgeSchemaConfig) Keys() ([]string, error) {
 	return redisDB_H.Keys(context.Background(), "*").Result()
 }
 func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model string) (id string, err error) {
-	has, err := c.HasSameExSymbol(swap_exchange, symbol)
+	has, err := c.HasSameExSymbol(spot_exchange, swap_exchange, symbol)
 	if err != nil {
 		return "", err
 	}
@@ -146,7 +146,7 @@ func (c *HedgeSchemaConfig) Vals() (allVals []HedgeSchemaItem, err error) {
 }
 
 // 是否存在同交易所币对
-func (c *HedgeSchemaConfig) HasSameExSymbol(swap_exchange string, symbol string) (has bool, err error) {
+func (c *HedgeSchemaConfig) HasSameExSymbol(spot_exchange, swap_exchange string, symbol string) (has bool, err error) {
 	list, err := c.Vals()
 	if err != nil {
 		return false, err
@@ -155,7 +155,7 @@ func (c *HedgeSchemaConfig) HasSameExSymbol(swap_exchange string, symbol string)
 		if v.SwapExchange == swap_exchange && v.Symbol == symbol {
 			return true, nil
 		}
-		if v.SpotExchange == swap_exchange && v.Symbol == symbol {
+		if v.SpotExchange == spot_exchange && v.Symbol == symbol {
 			return true, nil
 		}
 	}
