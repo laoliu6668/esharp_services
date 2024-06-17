@@ -19,7 +19,7 @@ type HedgeSchemaItem struct {
 	Id     string `json:"id"`     //  方案编号
 	Status bool   `json:"status"` //  运行状态: on-运行中 off-已停止
 
-	OpendLock    bool   `json:"open_lock"`     // 开仓行为锁: on-锁定 off-解锁
+	OpenLock     bool   `json:"open_lock"`     // 开仓行为锁: on-锁定 off-解锁
 	CloseLock    bool   `json:"close_lock"`    // 平仓行为锁: on-锁定 off-解锁
 	Symbol       string `json:"symbol"`        // c 对冲币对
 	SpotExchange string `json:"spot_exchange"` // c 现货交易所
@@ -39,7 +39,7 @@ type HedgeSchemaItem struct {
 	// group end 币对配置
 
 	Models              string  `json:"models"`                // c 对冲方案: spot_more_swap_less-现多期空 spot_less_swap_more-现空期多
-	OpendRate           float64 `json:"opend_rate"`            // * 开仓差率
+	OpenRate            float64 `json:"open_rate"`             // * 开仓差率
 	CloseRate           float64 `json:"close_rate"`            // * 平仓差率
 	SingleOrderVolume   int64   `json:"single_order_volume"`   // * 期货订单单笔张数(张)
 	PositionVolumeLimit int64   `json:"position_volume_limit"` // * 期货仓位持仓上限(张)
@@ -54,7 +54,7 @@ type HedgeSchemaItem struct {
 	SwapTotalCloseVolume int64   `json:"swap_total_close_volume"` // 期货累积开空张数
 	SwapTotalCloseValue  float64 `json:"swap_total_close_value"`  // 期货累积开空金额
 
-	RelOpendRate float64 `json:"rel_opend_rate"` // 实开差率
+	RelOpenRate  float64 `json:"rel_open_rate"`  // 实开差率
 	RelCloseRate float64 `json:"rel_close_rate"` // 实平差率
 	RelPl        float64 `json:"rel_pl"`         // 实际盈亏
 }
@@ -120,7 +120,7 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 	c.SetBool(spot_exchange, swap_exchange, symbol, "status", false)
 	c.SetBool(spot_exchange, swap_exchange, symbol, "open_lock", false)
 	c.SetBool(spot_exchange, swap_exchange, symbol, "close_lock", false)
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "opend_rate", 0)
+	c.SetFloat(spot_exchange, swap_exchange, symbol, "open_rate", 0)
 	c.SetFloat(spot_exchange, swap_exchange, symbol, "close_rate", 0)
 	c.SetInt(spot_exchange, swap_exchange, symbol, "single_order_volume", 2)
 	c.SetInt(spot_exchange, swap_exchange, symbol, "position_volume_limit", 1000)
@@ -128,7 +128,7 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 	c.SetFloat(spot_exchange, swap_exchange, symbol, "spot_cost", 0)
 	c.SetInt(spot_exchange, swap_exchange, symbol, "swap_volume", 0)
 	c.SetFloat(spot_exchange, swap_exchange, symbol, "swap_cost", 0)
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "rel_opend_rate", 0)
+	c.SetFloat(spot_exchange, swap_exchange, symbol, "rel_open_rate", 0)
 	c.SetFloat(spot_exchange, swap_exchange, symbol, "rel_close_rate", 0)
 	c.SetFloat(spot_exchange, swap_exchange, symbol, "rel_pl", 0)
 	return
@@ -219,8 +219,8 @@ func (c *HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (it
 			item.MaxCloseOrderVolume = toInt(v)
 		case "models":
 			item.Models = v
-		case "opend_rate":
-			item.OpendRate = toFloat(v)
+		case "open_rate":
+			item.OpenRate = toFloat(v)
 		case "close_rate":
 			item.CloseRate = toFloat(v)
 		case "single_order_volume":
@@ -243,8 +243,8 @@ func (c *HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (it
 			item.SwapTotalCloseVolume = toInt(v)
 		case "swap_total_close_value":
 			item.SwapTotalCloseValue = toFloat(v)
-		case "rel_opend_rate":
-			item.RelOpendRate = toFloat(v)
+		case "rel_open_rate":
+			item.RelOpenRate = toFloat(v)
 		case "rel_close_rate":
 			item.RelCloseRate = toFloat(v)
 		case "rel_pl":
