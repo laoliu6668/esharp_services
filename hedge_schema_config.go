@@ -2,6 +2,7 @@ package esharp_services
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -57,6 +58,11 @@ type HedgeSchemaItem struct {
 	RelPl        float64 `json:"rel_pl"`         // 实际盈亏
 }
 
+type HedgeSchemaMQ struct {
+	Action string          `json:"action"`
+	Data   HedgeSchemaItem `json:"data"`
+}
+
 type HedgeSchemaConfig struct {
 }
 
@@ -80,16 +86,6 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 		return "", errors.New("model error")
 	}
 	id = rdsName
-
-	err = redisDB_H.HSet(context.Background(), rdsName, "id", id).Err()
-	if err != nil {
-		return "", fmt.Errorf("redis set id error: %s", err)
-	}
-	c.Set(spot_exchange, swap_exchange, symbol, "symbol", symbol)
-	c.Set(spot_exchange, swap_exchange, symbol, "spot_exchange", spot_exchange)
-	c.Set(spot_exchange, swap_exchange, symbol, "swap_exchange", swap_exchange)
-	c.Set(spot_exchange, swap_exchange, symbol, "models", model)
-
 	spotSymbolItem, err := (&SpotSymbolConfig{
 		Exchange: spot_exchange,
 	}).Get(symbol)
@@ -102,33 +98,92 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 	if err != nil {
 		return "", fmt.Errorf("swap symbol config error: %s", err)
 	}
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "min_order_volume", spotSymbolItem.MinOrderVolume)
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "min_order_amount", spotSymbolItem.MinOrderAmount)
-	c.SetInt(spot_exchange, swap_exchange, symbol, "trade_volume_point", spotSymbolItem.TradeVolumePoint)
-	c.SetInt(spot_exchange, swap_exchange, symbol, "trade_price_point", spotSymbolItem.TradePricePoint)
-	c.SetInt(spot_exchange, swap_exchange, symbol, "trade_amount_point", spotSymbolItem.TradeAmountPoint)
+	err = redisDB_H.HSet(context.Background(), rdsName, "id", id).Err()
+	if err != nil {
+		return "", fmt.Errorf("redis set id error: %s", err)
+	}
+	c.set(spot_exchange, swap_exchange, symbol, "symbol", symbol)
+	c.set(spot_exchange, swap_exchange, symbol, "spot_exchange", spot_exchange)
+	c.set(spot_exchange, swap_exchange, symbol, "swap_exchange", swap_exchange)
+	c.set(spot_exchange, swap_exchange, symbol, "models", model)
 
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "contract_size", SwapSymbolitem.ContractSize)
-	c.SetInt(spot_exchange, swap_exchange, symbol, "max_buy_position_volume", SwapSymbolitem.MaxBuyPositionVolume)
-	c.SetInt(spot_exchange, swap_exchange, symbol, "max_sell_position_volume", SwapSymbolitem.MaxSellPositionVolume)
-	c.SetInt(spot_exchange, swap_exchange, symbol, "max_open_order_volume", SwapSymbolitem.MaxOpenOrderVolume)
-	c.SetInt(spot_exchange, swap_exchange, symbol, "max_close_order_volume", SwapSymbolitem.MaxCloseOrderVolume)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_volume", spotSymbolItem.MinOrderVolume)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_amount", spotSymbolItem.MinOrderAmount)
+	c.setInt(spot_exchange, swap_exchange, symbol, "trade_volume_point", spotSymbolItem.TradeVolumePoint)
+	c.setInt(spot_exchange, swap_exchange, symbol, "trade_price_point", spotSymbolItem.TradePricePoint)
+	c.setInt(spot_exchange, swap_exchange, symbol, "trade_amount_point", spotSymbolItem.TradeAmountPoint)
+
+	c.setFloat(spot_exchange, swap_exchange, symbol, "contract_size", SwapSymbolitem.ContractSize)
+	c.setInt(spot_exchange, swap_exchange, symbol, "max_buy_position_volume", SwapSymbolitem.MaxBuyPositionVolume)
+	c.setInt(spot_exchange, swap_exchange, symbol, "max_sell_position_volume", SwapSymbolitem.MaxSellPositionVolume)
+	c.setInt(spot_exchange, swap_exchange, symbol, "max_open_order_volume", SwapSymbolitem.MaxOpenOrderVolume)
+	c.setInt(spot_exchange, swap_exchange, symbol, "max_close_order_volume", SwapSymbolitem.MaxCloseOrderVolume)
 
 	// default value
-	c.SetBool(spot_exchange, swap_exchange, symbol, "status", false)
-	c.SetBool(spot_exchange, swap_exchange, symbol, "open_lock", false)
-	c.SetBool(spot_exchange, swap_exchange, symbol, "close_lock", false)
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "open_rate", 0)
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "close_rate", 0)
-	c.SetInt(spot_exchange, swap_exchange, symbol, "single_order_volume", 2)
-	c.SetInt(spot_exchange, swap_exchange, symbol, "position_volume_limit", 1000)
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "spot_volume", 0)
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "spot_cost", 0)
-	c.SetInt(spot_exchange, swap_exchange, symbol, "swap_volume", 0)
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "swap_cost", 0)
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "rel_open_rate", 0)
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "rel_close_rate", 0)
-	c.SetFloat(spot_exchange, swap_exchange, symbol, "rel_pl", 0)
+	c.setBool(spot_exchange, swap_exchange, symbol, "status", false)
+	c.setBool(spot_exchange, swap_exchange, symbol, "open_lock", false)
+	c.setBool(spot_exchange, swap_exchange, symbol, "close_lock", false)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "open_rate", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "close_rate", 0)
+	c.setInt(spot_exchange, swap_exchange, symbol, "single_order_volume", 0)
+	c.setInt(spot_exchange, swap_exchange, symbol, "position_volume_limit", 0)
+
+	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_buy_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_buy_value", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_sell_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_sell_value", 0)
+
+	c.setInt(spot_exchange, swap_exchange, symbol, "swap_total_open_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_open_value", 0)
+	c.setInt(spot_exchange, swap_exchange, symbol, "swap_total_close_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_close_value", 0)
+
+	c.setFloat(spot_exchange, swap_exchange, symbol, "rel_open_rate", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "rel_close_rate", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "rel_pl", 0)
+
+	// if rabbitmq.C
+	if schemaCh != nil {
+		item := HedgeSchemaMQ{
+			Action: "create",
+			Data: HedgeSchemaItem{
+				SpotExchange:          spot_exchange,
+				SwapExchange:          swap_exchange,
+				Symbol:                symbol,
+				Models:                model,
+				MinOrderVolume:        spotSymbolItem.MinOrderVolume,
+				MinOrderAmount:        spotSymbolItem.MinOrderAmount,
+				TradeVolumePoint:      spotSymbolItem.TradeVolumePoint,
+				TradePricePoint:       spotSymbolItem.TradePricePoint,
+				TradeAmountPoint:      spotSymbolItem.TradeAmountPoint,
+				ContractSize:          SwapSymbolitem.ContractSize,
+				MaxBuyPositionVolume:  SwapSymbolitem.MaxBuyPositionVolume,
+				MaxSellPositionVolume: SwapSymbolitem.MaxSellPositionVolume,
+				MaxOpenOrderVolume:    SwapSymbolitem.MaxOpenOrderVolume,
+				MaxCloseOrderVolume:   SwapSymbolitem.MaxCloseOrderVolume,
+				Status:                false,
+				OpenLock:              false,
+				CloseLock:             false,
+				OpenRate:              0,
+				CloseRate:             0,
+				SingleOrderVolume:     0,
+				PositionVolumeLimit:   0,
+				SpotTotalBuyVolume:    0,
+				SpotTotalSellVolume:   0,
+				SpotTotalBuyValue:     0,
+				SpotTotalSellValue:    0,
+				SwapTotalOpenVolume:   0,
+				SwapTotalOpenValue:    0,
+				SwapTotalCloseVolume:  0,
+				SwapTotalCloseValue:   0,
+				RelOpenRate:           0,
+				RelCloseRate:          0,
+				RelPl:                 0,
+			},
+		}
+		buf, _ := json.Marshal(item)
+		PublishToHedgeSchema(buf)
+	}
 	return
 }
 
@@ -266,8 +321,42 @@ func (c *HedgeSchemaConfig) Set(spot_exchange, swap_exchange, symbol, field, val
 	if err != nil {
 		return
 	}
+	item, _ := c.Get(spot_exchange, swap_exchange, symbol)
+	msg := HedgeSchemaMQ{
+		Action: "update",
+		Data:   item,
+	}
+	buf, _ := json.Marshal(msg)
+	PublishToHedgeSchema(buf)
 	return nil
 }
+func (c *HedgeSchemaConfig) set(spot_exchange, swap_exchange, symbol, field, value string) (err error) {
+	key := c.RdsName(spot_exchange, swap_exchange, symbol)
+	has, err := redisDB_H.Exists(context.Background(), key).Result()
+	if err != nil {
+		return fmt.Errorf("redis Exists error: %s", err)
+	}
+	if has == 0 {
+		// not has
+		return fmt.Errorf("redis key not exists: %s", key)
+	}
+	err = redisDB_H.HSet(context.Background(), key, field, value).Err()
+	if err != nil {
+		return
+	}
+	return nil
+}
+func (c *HedgeSchemaConfig) setInt(spot_exchange, swap_exchange, symbol, field string, value int64) (err error) {
+	return c.Set(spot_exchange, swap_exchange, symbol, field, strconv.FormatInt(value, 10))
+}
+
+func (c *HedgeSchemaConfig) setFloat(spot_exchange, swap_exchange, symbol, field string, value float64) (err error) {
+	return c.Set(spot_exchange, swap_exchange, symbol, field, floatTo(value))
+}
+func (c *HedgeSchemaConfig) setBool(spot_exchange, swap_exchange, symbol, field string, value bool) (err error) {
+	return c.Set(spot_exchange, swap_exchange, symbol, field, boolTo(value))
+}
+
 func (c *HedgeSchemaConfig) SetInt(spot_exchange, swap_exchange, symbol, field string, value int64) (err error) {
 	return c.Set(spot_exchange, swap_exchange, symbol, field, strconv.FormatInt(value, 10))
 }
@@ -311,6 +400,16 @@ func (c *HedgeSchemaConfig) Del(spot_exchange, swap_exchange, symbol string) (er
 	if err != nil {
 		return err
 	}
+	msg := HedgeSchemaMQ{
+		Action: "delete",
+		Data: HedgeSchemaItem{
+			SpotExchange: spot_exchange,
+			SwapExchange: swap_exchange,
+			Symbol:       symbol,
+		},
+	}
+	buf, _ := json.Marshal(msg)
+	PublishToHedgeSchema(buf)
 	return nil
 }
 
