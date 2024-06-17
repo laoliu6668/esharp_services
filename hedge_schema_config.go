@@ -381,10 +381,7 @@ func (c *HedgeSchemaConfig) Del(spot_exchange, swap_exchange, symbol string) (er
 	sp := SwapPositionConfig{
 		Exchange: item.SwapExchange,
 	}
-	swapPositionItem, err := sp.Get(item.Symbol)
-	if err != nil {
-		return fmt.Errorf("get swap position error: %s", err)
-	}
+	swapPositionItem, _ := sp.Get(item.Symbol)
 	var position int64
 	if item.Models == SpotLessSwapMore {
 		position = swapPositionItem.BuyVolume
