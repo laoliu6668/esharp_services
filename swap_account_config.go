@@ -29,7 +29,7 @@ var SwapAccountConfigExample = SwapAccountConfig{
 }
 
 func (c *SwapAccountConfig) RdsName() string {
-	return fmt.Sprintf("%s_swap_balance_config", c.Exchange)
+	return fmt.Sprintf("%s_swap_account_config", c.Exchange)
 }
 
 func (c *SwapAccountConfig) Init() (err error) {
