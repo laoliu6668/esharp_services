@@ -26,7 +26,7 @@ var HedgeSymbolConfigExample = HedgeSymbolConfig{
 }
 
 func (c *HedgeSymbolConfig) RdsName() string {
-	return fmt.Sprintf("%s_hedge_symbol", c.Exchange)
+	return fmt.Sprintf("%s_hedge_symbol_config", c.Exchange)
 }
 
 func (c *HedgeSymbolConfig) Init() (err error) {
