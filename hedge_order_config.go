@@ -89,7 +89,11 @@ func (c *HedgeOrderConfig) Get(key string) (value HedgeOrderItem, err error) {
 }
 
 func (c *HedgeOrderConfig) Set(key string, value HedgeOrderItem) (err error) {
-	err = redisDB.HSet(context.Background(), c.RdsName(), key, value).Err()
+	buf, err := json.Marshal(value)
+	if err != nil {
+		return
+	}
+	err = redisDB.HSet(context.Background(), c.RdsName(), key, string(buf)).Err()
 	if err != nil {
 		return
 	}

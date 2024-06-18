@@ -94,7 +94,11 @@ func (c *SwapOrderConfig) Get(orderId string) (value SwapOrderItem, err error) {
 }
 
 func (c *SwapOrderConfig) Set(orderId string, value SwapOrderItem) (err error) {
-	err = redisDB.HSet(context.Background(), c.RdsName(), orderId, value).Err()
+	buf, err := json.Marshal(value)
+	if err != nil {
+		return
+	}
+	err = redisDB.HSet(context.Background(), c.RdsName(), orderId, string(buf)).Err()
 	if err != nil {
 		return
 	}

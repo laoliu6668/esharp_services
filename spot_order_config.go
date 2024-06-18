@@ -93,7 +93,11 @@ func (c *SpotOrderConfig) Get(orderId string) (value SpotOrderItem, err error) {
 }
 
 func (c *SpotOrderConfig) Set(orderId string, value SpotOrderItem) (err error) {
-	err = redisDB.HSet(context.Background(), c.RdsName(), orderId, value).Err()
+	buf, err := json.Marshal(value)
+	if err != nil {
+		return
+	}
+	err = redisDB.HSet(context.Background(), c.RdsName(), orderId, string(buf)).Err()
 	if err != nil {
 		return
 	}
