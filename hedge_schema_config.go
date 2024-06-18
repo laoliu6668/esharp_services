@@ -59,8 +59,8 @@ type HedgeSchemaItem struct {
 }
 
 type HedgeSchemaMQ struct {
-	Action string          `json:"action"`
-	Data   HedgeSchemaItem `json:"data"`
+	Action string `json:"action"`
+	Data   any    `json:"data"`
 }
 
 type HedgeSchemaConfig struct {
@@ -307,29 +307,22 @@ func (c *HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (it
 	}
 	return
 }
-func (c *HedgeSchemaConfig) Set(spot_exchange, swap_exchange, symbol, field, value string) (err error) {
-	key := c.RdsName(spot_exchange, swap_exchange, symbol)
-	has, err := redisDB_H.Exists(context.Background(), key).Result()
+func (c *HedgeSchemaConfig) Set(spot_exchange, swap_exchange, symbol, field, value string, originVal any) (err error) {
+	err = c.set(spot_exchange, swap_exchange, symbol, field, value)
 	if err != nil {
-		return fmt.Errorf("redis Exists error: %s", err)
+		return err
 	}
-	if has == 0 {
-		// not has
-		return fmt.Errorf("redis key not exists: %s", key)
-	}
-	err = redisDB_H.HSet(context.Background(), key, field, value).Err()
-	if err != nil {
-		return
-	}
-	item, _ := c.Get(spot_exchange, swap_exchange, symbol)
-	msg := HedgeSchemaMQ{
+	up := HedgeSchemaMQ{
 		Action: "update",
-		Data:   item,
+		Data: map[string]any{
+			value: originVal,
+		},
 	}
-	buf, _ := json.Marshal(msg)
+	buf, _ := json.Marshal(up)
 	PublishToHedgeSchema(buf)
 	return nil
 }
+
 func (c *HedgeSchemaConfig) set(spot_exchange, swap_exchange, symbol, field, value string) (err error) {
 	key := c.RdsName(spot_exchange, swap_exchange, symbol)
 	has, err := redisDB_H.Exists(context.Background(), key).Result()
@@ -347,25 +340,25 @@ func (c *HedgeSchemaConfig) set(spot_exchange, swap_exchange, symbol, field, val
 	return nil
 }
 func (c *HedgeSchemaConfig) setInt(spot_exchange, swap_exchange, symbol, field string, value int64) (err error) {
-	return c.Set(spot_exchange, swap_exchange, symbol, field, strconv.FormatInt(value, 10))
+	return c.set(spot_exchange, swap_exchange, symbol, field, strconv.FormatInt(value, 10))
 }
 
 func (c *HedgeSchemaConfig) setFloat(spot_exchange, swap_exchange, symbol, field string, value float64) (err error) {
-	return c.Set(spot_exchange, swap_exchange, symbol, field, floatTo(value))
+	return c.set(spot_exchange, swap_exchange, symbol, field, floatTo(value))
 }
 func (c *HedgeSchemaConfig) setBool(spot_exchange, swap_exchange, symbol, field string, value bool) (err error) {
-	return c.Set(spot_exchange, swap_exchange, symbol, field, boolTo(value))
+	return c.set(spot_exchange, swap_exchange, symbol, field, boolTo(value))
 }
 
 func (c *HedgeSchemaConfig) SetInt(spot_exchange, swap_exchange, symbol, field string, value int64) (err error) {
-	return c.Set(spot_exchange, swap_exchange, symbol, field, strconv.FormatInt(value, 10))
+	return c.Set(spot_exchange, swap_exchange, symbol, field, strconv.FormatInt(value, 10), value)
 }
 
 func (c *HedgeSchemaConfig) SetFloat(spot_exchange, swap_exchange, symbol, field string, value float64) (err error) {
-	return c.Set(spot_exchange, swap_exchange, symbol, field, floatTo(value))
+	return c.Set(spot_exchange, swap_exchange, symbol, field, floatTo(value), value)
 }
 func (c *HedgeSchemaConfig) SetBool(spot_exchange, swap_exchange, symbol, field string, value bool) (err error) {
-	return c.Set(spot_exchange, swap_exchange, symbol, field, boolTo(value))
+	return c.Set(spot_exchange, swap_exchange, symbol, field, boolTo(value), value)
 }
 
 // 运行中的方案不允许被删除，有期货持仓量的不能被删除

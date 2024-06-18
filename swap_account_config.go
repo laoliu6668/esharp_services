@@ -14,8 +14,8 @@ type SwapAccountConfig struct {
 type SwapAccountItem struct {
 	Exchange    string  `json:"exchange"`
 	Symbol      string  `json:"symbol"`
-	FreeBalance float64 `json:"free_balance"`
-	LockBalance float64 `json:"lock_balance"`
+	FreeBalance float64 `json:"free_balance"` // 可用保金
+	LockBalance float64 `json:"lock_balance"` // 冻结保金
 	LiquidPrice float64 `json:"liquid_price"` // 强平价格
 	MarginRatio float64 `json:"margin_ratio"` // 保证金率
 	UpdateAt    float64 `json:"update_at"`
