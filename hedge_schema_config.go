@@ -315,7 +315,10 @@ func (c *HedgeSchemaConfig) Set(spot_exchange, swap_exchange, symbol, field, val
 	up := HedgeSchemaMQ{
 		Action: "update",
 		Data: map[string]any{
-			value: originVal,
+			"spot_exchange": spot_exchange,
+			"swap_exchange": swap_exchange,
+			"symbol":        symbol,
+			field:           originVal,
 		},
 	}
 	buf, _ := json.Marshal(up)
@@ -392,10 +395,10 @@ func (c *HedgeSchemaConfig) Del(spot_exchange, swap_exchange, symbol string) (er
 	}
 	msg := HedgeSchemaMQ{
 		Action: "delete",
-		Data: HedgeSchemaItem{
-			SpotExchange: spot_exchange,
-			SwapExchange: swap_exchange,
-			Symbol:       symbol,
+		Data: map[string]string{
+			"spot_exchange": spot_exchange,
+			"swap_exchange": swap_exchange,
+			"symbol":        symbol,
 		},
 	}
 	buf, _ := json.Marshal(msg)
