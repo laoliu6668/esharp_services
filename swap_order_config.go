@@ -38,7 +38,7 @@ var SwapOrderExample = SwapOrderConfig{
 }
 
 func (c *SwapOrderConfig) RdsName() string {
-	return fmt.Sprintf("%s_spot_order_config", c.ExchangeName)
+	return fmt.Sprintf("%s_swap_order_config", c.ExchangeName)
 }
 
 func (c *SwapOrderConfig) Init() (err error) {
