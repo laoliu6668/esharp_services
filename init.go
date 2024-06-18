@@ -1,6 +1,8 @@
 package esharp_services
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 
 	"github.com/laoliu6668/esharp_services/util/rabbitmq"
@@ -48,7 +50,17 @@ func InitRabbitMq(s string) {
 	schemaCh = ch
 }
 
-func PublishToHedgeSchema(body []byte) error {
+func PublishToHedgeSchema(input []byte) error {
+	var buf bytes.Buffer
+	gw := gzip.NewWriter(&buf)
+	defer gw.Close()
+	_, err := gw.Write(input)
+	if err != nil {
+		return err
+	}
+	if err := gw.Close(); err != nil {
+		return err
+	}
 	return schemaCh.Publish(
 		"hedge_schema_config", // exchange
 		"",                    // routing key
@@ -56,6 +68,6 @@ func PublishToHedgeSchema(body []byte) error {
 		false,                 // immediate
 		amqp091.Publishing{
 			ContentType: "text/plain",
-			Body:        body,
+			Body:        buf.Bytes(),
 		})
 }
