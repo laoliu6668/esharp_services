@@ -147,6 +147,7 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 		item := HedgeSchemaMQ{
 			Action: "create",
 			Data: HedgeSchemaItem{
+				Id:                    id,
 				SpotExchange:          spot_exchange,
 				SwapExchange:          swap_exchange,
 				Symbol:                symbol,
@@ -315,6 +316,7 @@ func (c *HedgeSchemaConfig) Set(spot_exchange, swap_exchange, symbol, field, val
 	up := HedgeSchemaMQ{
 		Action: "update",
 		Data: map[string]any{
+			"id":            c.RdsName(spot_exchange, swap_exchange, symbol),
 			"spot_exchange": spot_exchange,
 			"swap_exchange": swap_exchange,
 			"symbol":        symbol,
@@ -396,6 +398,7 @@ func (c *HedgeSchemaConfig) Del(spot_exchange, swap_exchange, symbol string) (er
 	msg := HedgeSchemaMQ{
 		Action: "delete",
 		Data: map[string]string{
+			"id":            c.RdsName(spot_exchange, swap_exchange, symbol),
 			"spot_exchange": spot_exchange,
 			"swap_exchange": swap_exchange,
 			"symbol":        symbol,
