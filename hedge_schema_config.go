@@ -245,6 +245,10 @@ func (c *HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (it
 			item.Id = v
 		case "status":
 			item.Status = toBool(v)
+		case "open_lock":
+			item.OpenLock = toBool(v)
+		case "close_lock":
+			item.CloseLock = toBool(v)
 		case "symbol":
 			item.Symbol = v
 		case "spot_exchange":
