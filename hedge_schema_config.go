@@ -44,15 +44,25 @@ type HedgeSchemaItem struct {
 	SingleOrderVolume   int64   `json:"single_order_volume"`   // * 期货订单单笔张数(张)
 	PositionVolumeLimit int64   `json:"position_volume_limit"` // * 期货仓位持仓上限(张)
 
-	SpotTotalBuyVolume  float64 `json:"spot_total_buy_volume"`  // 现货累积买入数量
-	SpotTotalBuyValue   float64 `json:"spot_total_buy_value"`   // 现货累积买入花费
-	SpotTotalSellVolume float64 `json:"spot_total_sell_volume"` // 现货累积卖出数量
-	SpotTotalSellValue  float64 `json:"spot_total_sell_value"`  // 现货累积卖出金额
+	// 现空期多
+	SpotTotalBuyVolume      float64 `json:"spot_total_buy_volume"`       // 现货累积买入数量
+	SpotTotalBuyValue       float64 `json:"spot_total_buy_value"`        // 现货累积买入花费
+	SpotTotalSellVolume     float64 `json:"spot_total_sell_volume"`      // 现货累积卖出数量
+	SpotTotalSellValue      float64 `json:"spot_total_sell_value"`       // 现货累积卖出金额
+	SwapTotalSellOpenVolume int64   `json:"swap_total_sell_open_volume"` // 期货累积开空张数
+	SwapTotalSellOpenValue  float64 `json:"swap_total_sell_open_value"`  // 期货累积开空花费
+	SwapTotalBuyCloseVolume int64   `json:"swap_total_buy_close_volume"` // 期货累积平空张数
+	SwapTotalBuyCloseValue  float64 `json:"swap_total_buy_close_value"`  // 期货累积平空金额
 
-	SwapTotalOpenVolume  int64   `json:"swap_total_open_volume"`  // 期货累积开多张数
-	SwapTotalOpenValue   float64 `json:"swap_total_open_value"`   // 期货累积开多花费
-	SwapTotalCloseVolume int64   `json:"swap_total_close_volume"` // 期货累积开空张数
-	SwapTotalCloseValue  float64 `json:"swap_total_close_value"`  // 期货累积开空金额
+	// 现多期空
+	SpotTotalBorrowVolume    float64 `json:"spot_total_borrow_volume"`     // 现货累积借币数量
+	SpotTotalBorrowValue     float64 `json:"spot_total_borrow_value"`      // 现货累积借币花费
+	SpotTotalReturnVolume    float64 `json:"spot_total_return_volume"`     // 现货累积还币数量
+	SpotTotalReturnValue     float64 `json:"spot_total_return_value"`      // 现货累积还币金额
+	SwapTotalBuyOpenVolume   int64   `json:"swap_total_buy_volume"`        // 期货累积买入开多张数
+	SwapTotalBuyOpenValue    float64 `json:"swap_total_buy_open_value"`    // 期货累积买入开多花费
+	SwapTotalSellCloseVolume int64   `json:"swap_total_sell_close_volume"` // 期货累积卖出平多张数
+	SwapTotalSellCloseValue  float64 `json:"swap_total_sell_close_value"`  // 期货累积卖出平多金额
 
 	RelOpenRate  float64 `json:"rel_open_rate"`  // 实开差率
 	RelCloseRate float64 `json:"rel_close_rate"` // 实平差率
@@ -133,11 +143,19 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_buy_value", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_sell_volume", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_sell_value", 0)
+	c.setInt(spot_exchange, swap_exchange, symbol, "swap_total_sell_open_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_sell_open_value", 0)
+	c.setInt(spot_exchange, swap_exchange, symbol, "swap_total_buy_close_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_buy_close_value", 0)
 
-	c.setInt(spot_exchange, swap_exchange, symbol, "swap_total_open_volume", 0)
-	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_open_value", 0)
-	c.setInt(spot_exchange, swap_exchange, symbol, "swap_total_close_volume", 0)
-	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_close_value", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_borrow_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_borrow_value", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_return_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_return_value", 0)
+	c.setInt(spot_exchange, swap_exchange, symbol, "swap_total_buy_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_buy_open_value", 0)
+	c.setInt(spot_exchange, swap_exchange, symbol, "swap_total_sell_close_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_sell_close_value", 0)
 
 	c.setFloat(spot_exchange, swap_exchange, symbol, "rel_open_rate", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "rel_close_rate", 0)
@@ -166,21 +184,6 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 				Status:                false,
 				OpenLock:              false,
 				CloseLock:             false,
-				OpenRate:              0,
-				CloseRate:             0,
-				SingleOrderVolume:     0,
-				PositionVolumeLimit:   0,
-				SpotTotalBuyVolume:    0,
-				SpotTotalSellVolume:   0,
-				SpotTotalBuyValue:     0,
-				SpotTotalSellValue:    0,
-				SwapTotalOpenVolume:   0,
-				SwapTotalOpenValue:    0,
-				SwapTotalCloseVolume:  0,
-				SwapTotalCloseValue:   0,
-				RelOpenRate:           0,
-				RelCloseRate:          0,
-				RelPl:                 0,
 			},
 		}
 		buf, _ := json.Marshal(item)
@@ -294,14 +297,30 @@ func (c *HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (it
 			item.SpotTotalSellVolume = toFloat(v)
 		case "spot_total_sell_value":
 			item.SpotTotalSellValue = toFloat(v)
-		case "swap_total_open_volume":
-			item.SwapTotalOpenVolume = toInt(v)
-		case "swap_total_open_value":
-			item.SwapTotalOpenValue = toFloat(v)
-		case "swap_total_close_volume":
-			item.SwapTotalCloseVolume = toInt(v)
-		case "swap_total_close_value":
-			item.SwapTotalCloseValue = toFloat(v)
+		case "swap_total_sell_open_volume":
+			item.SwapTotalSellOpenVolume = toInt(v)
+		case "swap_total_sell_open_value":
+			item.SwapTotalSellOpenValue = toFloat(v)
+		case "swap_total_buy_close_volume":
+			item.SwapTotalBuyCloseVolume = toInt(v)
+		case "swap_total_buy_close_value":
+			item.SwapTotalBuyCloseValue = toFloat(v)
+		case "spot_total_borrow_volume":
+			item.SpotTotalBorrowVolume = toFloat(v)
+		case "spot_total_borrow_value":
+			item.SpotTotalBorrowValue = toFloat(v)
+		case "spot_total_return_volume":
+			item.SpotTotalReturnVolume = toFloat(v)
+		case "spot_total_return_value":
+			item.SpotTotalReturnValue = toFloat(v)
+		case "swap_total_buy_volume":
+			item.SwapTotalBuyOpenVolume = toInt(v)
+		case "swap_total_buy_open_value":
+			item.SwapTotalBuyOpenValue = toFloat(v)
+		case "swap_total_sell_close_volume":
+			item.SwapTotalSellCloseVolume = toInt(v)
+		case "swap_total_sell_close_value":
+			item.SwapTotalSellCloseValue = toFloat(v)
 		case "rel_open_rate":
 			item.RelOpenRate = toFloat(v)
 		case "rel_close_rate":
