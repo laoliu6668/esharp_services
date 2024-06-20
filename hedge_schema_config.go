@@ -25,11 +25,12 @@ type HedgeSchemaItem struct {
 	SwapExchange string `json:"swap_exchange"` // c 期货交易所
 
 	// group start 币对配置
-	MinOrderVolume        float64 `json:"min_order_volume"`         // 最小下单数量
-	MinOrderAmount        float64 `json:"min_order_amount"`         // 最小下单金额
-	TradeVolumePoint      int64   `json:"trade_volume_point"`       // 交易数量精度
-	TradePricePoint       int64   `json:"trade_price_point"`        // 交易价格精度
-	TradeAmountPoint      int64   `json:"trade_amount_point"`       // 交易金额精度
+	MinOrderVolume   float64 `json:"min_order_volume"`   // 最小下单数量
+	MinOrderAmount   float64 `json:"min_order_amount"`   // 最小下单金额
+	TradeVolumePoint int64   `json:"trade_volume_point"` // 交易数量精度
+	TradePricePoint  int64   `json:"trade_price_point"`  // 交易价格精度
+	TradeAmountPoint int64   `json:"trade_amount_point"` // 交易金额精度
+
 	ContractSize          float64 `json:"contract_size"`            // 合约面值
 	MaxBuyPositionVolume  int64   `json:"max_buy_position_volume"`  // 多仓持仓上限(张)
 	MaxSellPositionVolume int64   `json:"max_sell_position_volume"` // 空仓持仓上限(张)
