@@ -15,7 +15,6 @@ const (
 )
 
 var schemaCh *amqp091.Channel
-var swapAccountCh *amqp091.Channel
 
 var redisDB *redis.Client
 var redisDB_H *redis.Client
