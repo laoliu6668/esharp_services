@@ -236,3 +236,7 @@ func JsonDecodeNumber(s string) (mp map[string]any, err error) {
 	}
 	return mp, nil
 }
+
+func GetTimeFloat() float64 {
+	return float64(time.Now().UnixNano()) / 1000000000
+}

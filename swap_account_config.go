@@ -1,9 +1,15 @@
 package esharp_services
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/laoliu6668/esharp_services/util"
+	"github.com/laoliu6668/esharp_services/util/rabbitmq"
+	"github.com/rabbitmq/amqp091-go"
 )
 
 type SwapAccountConfig struct {
@@ -105,4 +111,59 @@ func (c *SwapAccountConfig) SetFreeBalance(key string, amount float64) (err erro
 	}
 	vals.FreeBalance = amount
 	return c.Set(key, vals)
+}
+
+// 变动金额
+func (c *SwapAccountConfig) ChangeFreeBalanceAndPushMQ(symbol string, changeAmount float64) (err error) {
+
+	vals, err := c.Get(symbol)
+	if err != nil {
+		return
+	}
+	if vals.UpdateAt >= util.GetTimeFloat() {
+		return
+	}
+	vals.FreeBalance += changeAmount
+	vals.UpdateAt = util.GetTimeFloat()
+	c.Set(symbol, vals)
+
+	ch, err := rabbitmq.NewChannel()
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		return
+	}
+	err = ch.ExchangeDeclare(
+		c.RdsName(), // name
+		"topic",     // type
+		true,        // durable
+		false,       // auto-deleted
+		false,       // internal
+		false,       // no-wait
+		nil,         // arguments
+	)
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		return
+	}
+	input, _ := json.Marshal(vals)
+	var buf bytes.Buffer
+	gw := gzip.NewWriter(&buf)
+	defer gw.Close()
+	_, err = gw.Write(input)
+	if err != nil {
+		return err
+	}
+	if err := gw.Close(); err != nil {
+		return err
+	}
+	schemaCh.Publish(
+		c.RdsName(), // exchange
+		symbol,      // routing key
+		false,       // mandatory
+		false,       // immediate
+		amqp091.Publishing{
+			Body: buf.Bytes(),
+		},
+	)
+	return nil
 }

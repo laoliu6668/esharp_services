@@ -15,6 +15,7 @@ const (
 )
 
 var schemaCh *amqp091.Channel
+var swapAccountCh *amqp091.Channel
 
 var redisDB *redis.Client
 var redisDB_H *redis.Client
@@ -29,6 +30,10 @@ func InitDB_H(db *redis.Client) {
 
 func InitRabbitMq(s string) {
 	rabbitmq.InitConn(s)
+	initSchemaCh()
+}
+
+func initSchemaCh() {
 	ch, err := rabbitmq.NewChannel()
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
