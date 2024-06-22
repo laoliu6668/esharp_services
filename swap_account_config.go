@@ -10,6 +10,7 @@ import (
 	"github.com/laoliu6668/esharp_services/util"
 	"github.com/laoliu6668/esharp_services/util/rabbitmq"
 	"github.com/rabbitmq/amqp091-go"
+	"github.com/redis/go-redis/v9"
 )
 
 type SwapAccountConfig struct {
@@ -69,6 +70,12 @@ func (c *SwapAccountConfig) Has(key string) (has bool, err error) {
 func (c *SwapAccountConfig) Get(key string) (value SwapAccountItem, err error) {
 	ret, err1 := redisDB.HGet(context.Background(), c.RdsName(), key).Result()
 	if err1 != nil {
+		if err1 == redis.Nil {
+			return SwapAccountItem{
+				Exchange: c.Exchange,
+				Symbol:   key,
+			}, nil
+		}
 		err = err1
 		return
 	}

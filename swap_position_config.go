@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type SwapPositionItem struct {
@@ -78,6 +80,12 @@ func (c *SwapPositionConfig) Vals() (vals []SwapPositionItem, err error) {
 func (c *SwapPositionConfig) Get(key string) (value SwapPositionItem, err error) {
 	ret, err1 := redisDB.HGet(context.Background(), c.RdsName(), key).Result()
 	if err1 != nil {
+		if err1 != redis.Nil {
+			return SwapPositionItem{
+				Exchange: c.Exchange,
+				Symbol:   key,
+			}, nil
+		}
 		err = err1
 		return
 	}
