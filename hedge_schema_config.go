@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -67,6 +68,8 @@ type HedgeSchemaItem struct {
 	RelOpenRate  float64 `json:"rel_open_rate"`  // 实开差率
 	RelCloseRate float64 `json:"rel_close_rate"` // 实平差率
 	RelPl        float64 `json:"rel_pl"`         // 实际盈亏
+
+	CreatedAt int64 `json:"created_at"` // 创建时间
 }
 
 type HedgeSchemaMQ struct {
@@ -160,6 +163,7 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 	c.setFloat(spot_exchange, swap_exchange, symbol, "rel_open_rate", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "rel_close_rate", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "rel_pl", 0)
+	c.setInt(spot_exchange, swap_exchange, symbol, "created_at", time.Now().Unix())
 
 	// if rabbitmq.C
 	if schemaCh != nil {
@@ -184,6 +188,7 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 				Status:                false,
 				OpenLock:              false,
 				CloseLock:             false,
+				CreatedAt:             time.Now().Unix(),
 			},
 		}
 		buf, _ := json.Marshal(item)
@@ -327,6 +332,8 @@ func (c *HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (it
 			item.RelCloseRate = toFloat(v)
 		case "rel_pl":
 			item.RelPl = toFloat(v)
+		case "created_at":
+			item.CreatedAt = toInt(v)
 		}
 
 	}
