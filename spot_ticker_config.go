@@ -88,3 +88,11 @@ func (c *SpotTickerConfig) Set(key string, value Ticker) (err error) {
 	}
 	return nil
 }
+
+func (c *SpotTickerConfig) SetJson(key string, json string) (err error) {
+	err = redisDB.HSet(context.Background(), c.RdsName(), key, json).Err()
+	if err != nil {
+		return
+	}
+	return nil
+}
