@@ -100,3 +100,11 @@ func (c *SwapTickerConfig) Set(key string, value Ticker) (err error) {
 	}
 	return nil
 }
+
+func (c *SwapTickerConfig) SetJson(key string, json string) (err error) {
+	err = redisDB.HSet(context.Background(), c.RdsName(), key, json).Err()
+	if err != nil {
+		return
+	}
+	return nil
+}
