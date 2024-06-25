@@ -1,8 +1,6 @@
 package esharp_services
 
 import (
-	"bytes"
-	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -153,23 +151,13 @@ func (c *SwapAccountConfig) ChangeFreeBalanceAndPushMQ(symbol string, changeAmou
 		return
 	}
 	input, _ := json.Marshal(vals)
-	var buf bytes.Buffer
-	gw := gzip.NewWriter(&buf)
-	defer gw.Close()
-	_, err = gw.Write(input)
-	if err != nil {
-		return err
-	}
-	if err := gw.Close(); err != nil {
-		return err
-	}
 	schemaCh.Publish(
 		c.RdsName(), // exchange
 		symbol,      // routing key
 		false,       // mandatory
 		false,       // immediate
 		amqp091.Publishing{
-			Body: buf.Bytes(),
+			Body: input,
 		},
 	)
 	return nil
