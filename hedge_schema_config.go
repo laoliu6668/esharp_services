@@ -242,6 +242,10 @@ func (c *HedgeSchemaConfig) Has(spot_exchange string, swap_exchange string, symb
 	return true, nil
 }
 func (c *HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (item HedgeSchemaItem, err error) {
+	has, _ := c.Has(spot_exchange, swap_exchange, symbol)
+	if !has {
+		return item, errors.New("not found")
+	}
 	itemVals, err1 := redisDB_H.HGetAll(context.Background(), c.RdsName(spot_exchange, swap_exchange, symbol)).Result()
 	if err1 != nil {
 		err = err1
