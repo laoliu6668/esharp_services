@@ -80,14 +80,14 @@ type HedgeSchemaMQ struct {
 type HedgeSchemaConfig struct {
 }
 
-func (c *HedgeSchemaConfig) RdsName(spot_exchange, swap_exchange, symbol string) string {
+func (c HedgeSchemaConfig) RdsName(spot_exchange, swap_exchange, symbol string) string {
 	return fmt.Sprintf("%s_%s_%s", spot_exchange, swap_exchange, symbol)
 }
 
-func (c *HedgeSchemaConfig) Keys() ([]string, error) {
+func (c HedgeSchemaConfig) Keys() ([]string, error) {
 	return redisDB_H.Keys(context.Background(), "*").Result()
 }
-func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model string) (id string, err error) {
+func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model string) (id string, err error) {
 	rdsName := c.RdsName(spot_exchange, swap_exchange, symbol)
 	has, err := c.HasSameExSymbol(spot_exchange, swap_exchange, symbol)
 	if err != nil {
@@ -197,7 +197,7 @@ func (c *HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model stri
 	return
 }
 
-func (c *HedgeSchemaConfig) Vals() (allVals []HedgeSchemaItem, err error) {
+func (c HedgeSchemaConfig) Vals() (allVals []HedgeSchemaItem, err error) {
 	keys, err := c.Keys()
 	if err != nil {
 		return
@@ -215,7 +215,7 @@ func (c *HedgeSchemaConfig) Vals() (allVals []HedgeSchemaItem, err error) {
 }
 
 // 是否存在同交易所币对
-func (c *HedgeSchemaConfig) HasSameExSymbol(spot_exchange, swap_exchange string, symbol string) (has bool, err error) {
+func (c HedgeSchemaConfig) HasSameExSymbol(spot_exchange, swap_exchange string, symbol string) (has bool, err error) {
 	list, err := c.Vals()
 	if err != nil {
 		return false, err
@@ -231,7 +231,7 @@ func (c *HedgeSchemaConfig) HasSameExSymbol(spot_exchange, swap_exchange string,
 	return false, nil
 }
 
-func (c *HedgeSchemaConfig) Has(spot_exchange string, swap_exchange string, symbol string) (has bool, err error) {
+func (c HedgeSchemaConfig) Has(spot_exchange string, swap_exchange string, symbol string) (has bool, err error) {
 	hasi, err := redisDB_H.Exists(context.Background(), c.RdsName(spot_exchange, swap_exchange, symbol)).Result()
 	if err != nil {
 		return false, err
@@ -241,7 +241,7 @@ func (c *HedgeSchemaConfig) Has(spot_exchange string, swap_exchange string, symb
 	}
 	return true, nil
 }
-func (c *HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (item HedgeSchemaItem, err error) {
+func (c HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (item HedgeSchemaItem, err error) {
 	has, _ := c.Has(spot_exchange, swap_exchange, symbol)
 	if !has {
 		return item, errors.New("not found")
@@ -343,7 +343,7 @@ func (c *HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (it
 	}
 	return
 }
-func (c *HedgeSchemaConfig) Set(spot_exchange, swap_exchange, symbol, field, value string, originVal any) (err error) {
+func (c HedgeSchemaConfig) Set(spot_exchange, swap_exchange, symbol, field, value string, originVal any) (err error) {
 	err = c.set(spot_exchange, swap_exchange, symbol, field, value)
 	if err != nil {
 		return err
@@ -363,7 +363,7 @@ func (c *HedgeSchemaConfig) Set(spot_exchange, swap_exchange, symbol, field, val
 	return nil
 }
 
-func (c *HedgeSchemaConfig) set(spot_exchange, swap_exchange, symbol, field, value string) (err error) {
+func (c HedgeSchemaConfig) set(spot_exchange, swap_exchange, symbol, field, value string) (err error) {
 	key := c.RdsName(spot_exchange, swap_exchange, symbol)
 	has, err := redisDB_H.Exists(context.Background(), key).Result()
 	if err != nil {
@@ -379,30 +379,30 @@ func (c *HedgeSchemaConfig) set(spot_exchange, swap_exchange, symbol, field, val
 	}
 	return nil
 }
-func (c *HedgeSchemaConfig) setInt(spot_exchange, swap_exchange, symbol, field string, value int64) (err error) {
+func (c HedgeSchemaConfig) setInt(spot_exchange, swap_exchange, symbol, field string, value int64) (err error) {
 	return c.set(spot_exchange, swap_exchange, symbol, field, strconv.FormatInt(value, 10))
 }
 
-func (c *HedgeSchemaConfig) setFloat(spot_exchange, swap_exchange, symbol, field string, value float64) (err error) {
+func (c HedgeSchemaConfig) setFloat(spot_exchange, swap_exchange, symbol, field string, value float64) (err error) {
 	return c.set(spot_exchange, swap_exchange, symbol, field, floatTo(value))
 }
-func (c *HedgeSchemaConfig) setBool(spot_exchange, swap_exchange, symbol, field string, value bool) (err error) {
+func (c HedgeSchemaConfig) setBool(spot_exchange, swap_exchange, symbol, field string, value bool) (err error) {
 	return c.set(spot_exchange, swap_exchange, symbol, field, boolTo(value))
 }
 
-func (c *HedgeSchemaConfig) SetInt(spot_exchange, swap_exchange, symbol, field string, value int64) (err error) {
+func (c HedgeSchemaConfig) SetInt(spot_exchange, swap_exchange, symbol, field string, value int64) (err error) {
 	return c.Set(spot_exchange, swap_exchange, symbol, field, strconv.FormatInt(value, 10), value)
 }
 
-func (c *HedgeSchemaConfig) SetFloat(spot_exchange, swap_exchange, symbol, field string, value float64) (err error) {
+func (c HedgeSchemaConfig) SetFloat(spot_exchange, swap_exchange, symbol, field string, value float64) (err error) {
 	return c.Set(spot_exchange, swap_exchange, symbol, field, floatTo(value), value)
 }
-func (c *HedgeSchemaConfig) SetBool(spot_exchange, swap_exchange, symbol, field string, value bool) (err error) {
+func (c HedgeSchemaConfig) SetBool(spot_exchange, swap_exchange, symbol, field string, value bool) (err error) {
 	return c.Set(spot_exchange, swap_exchange, symbol, field, boolTo(value), value)
 }
 
 // 运行中的方案不允许被删除，有期货持仓量的不能被删除
-func (c *HedgeSchemaConfig) Del(spot_exchange, swap_exchange, symbol string) (err error) {
+func (c HedgeSchemaConfig) Del(spot_exchange, swap_exchange, symbol string) (err error) {
 	key := c.RdsName(spot_exchange, swap_exchange, symbol)
 	item, err := c.Get(spot_exchange, swap_exchange, symbol)
 	if err != nil {

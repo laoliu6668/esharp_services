@@ -29,11 +29,11 @@ var SwapPositionConfigExample = SwapPositionConfig{
 	},
 }
 
-func (c *SwapPositionConfig) RdsName() string {
+func (c SwapPositionConfig) RdsName() string {
 	return fmt.Sprintf("%s_swap_position_config", c.Exchange)
 }
 
-func (c *SwapPositionConfig) Init() (err error) {
+func (c SwapPositionConfig) Init() (err error) {
 	for k, v := range c.RdsData {
 		err = c.Set(k, v)
 		if err != nil {
@@ -43,7 +43,7 @@ func (c *SwapPositionConfig) Init() (err error) {
 	return nil
 }
 
-func (c *SwapPositionConfig) GetAll() (all map[string]SwapPositionItem, err error) {
+func (c SwapPositionConfig) GetAll() (all map[string]SwapPositionItem, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -56,15 +56,15 @@ func (c *SwapPositionConfig) GetAll() (all map[string]SwapPositionItem, err erro
 	}
 	return all, err
 }
-func (c *SwapPositionConfig) Has(key string) (has bool, err error) {
+func (c SwapPositionConfig) Has(key string) (has bool, err error) {
 	has, err = redisDB.HExists(context.Background(), c.RdsName(), key).Result()
 	return
 }
 
-func (c *SwapPositionConfig) Keys() (keys []string, err error) {
+func (c SwapPositionConfig) Keys() (keys []string, err error) {
 	return redisDB.HKeys(context.Background(), c.RdsName()).Result()
 }
-func (c *SwapPositionConfig) Vals() (vals []SwapPositionItem, err error) {
+func (c SwapPositionConfig) Vals() (vals []SwapPositionItem, err error) {
 	strList, err := redisDB.HVals(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -77,7 +77,7 @@ func (c *SwapPositionConfig) Vals() (vals []SwapPositionItem, err error) {
 	}
 	return
 }
-func (c *SwapPositionConfig) Get(key string) (value SwapPositionItem, err error) {
+func (c SwapPositionConfig) Get(key string) (value SwapPositionItem, err error) {
 	ret, err1 := redisDB.HGet(context.Background(), c.RdsName(), key).Result()
 	if err1 != nil {
 		if err1 == redis.Nil {
@@ -93,7 +93,7 @@ func (c *SwapPositionConfig) Get(key string) (value SwapPositionItem, err error)
 	return
 }
 
-func (c *SwapPositionConfig) Set(key string, value SwapPositionItem) (err error) {
+func (c SwapPositionConfig) Set(key string, value SwapPositionItem) (err error) {
 	value.Exchange = c.Exchange
 	buf, err := json.Marshal(value)
 	if err != nil {
