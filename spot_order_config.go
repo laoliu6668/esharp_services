@@ -29,18 +29,18 @@ type SpotOrderConfig struct {
 }
 
 // example
-var SpotOrderExample = SpotOrderConfig{
-	ExchangeName: "htx",
-	RdsData: map[string]SpotOrderItem{
-		"SPferwa1213": {},
-	},
-}
+// var SpotOrderExample = SpotOrderConfig{
+// 	ExchangeName: "htx",
+// 	RdsData: map[string]SpotOrderItem{
+// 		"SPferwa1213": {},
+// 	},
+// }
 
-func (c *SpotOrderConfig) RdsName() string {
+func (c SpotOrderConfig) RdsName() string {
 	return fmt.Sprintf("%s_spot_order_config", c.ExchangeName)
 }
 
-func (c *SpotOrderConfig) Init() (err error) {
+func (c SpotOrderConfig) Init() (err error) {
 	for k, v := range c.RdsData {
 		err = c.Set(k, v)
 		if err != nil {
@@ -49,10 +49,10 @@ func (c *SpotOrderConfig) Init() (err error) {
 	}
 	return nil
 }
-func (c *SpotOrderConfig) Keys() (all []string, err error) {
+func (c SpotOrderConfig) Keys() (all []string, err error) {
 	return redisDB.HKeys(context.Background(), c.RdsName()).Result()
 }
-func (c *SpotOrderConfig) GetAll() (all map[string]SpotOrderItem, err error) {
+func (c SpotOrderConfig) GetAll() (all map[string]SpotOrderItem, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -65,7 +65,7 @@ func (c *SpotOrderConfig) GetAll() (all map[string]SpotOrderItem, err error) {
 	}
 	return all, err
 }
-func (c *SpotOrderConfig) Vals() (all []SpotOrderItem, err error) {
+func (c SpotOrderConfig) Vals() (all []SpotOrderItem, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -78,11 +78,11 @@ func (c *SpotOrderConfig) Vals() (all []SpotOrderItem, err error) {
 	}
 	return all, err
 }
-func (c *SpotOrderConfig) Has(orderId string) (has bool, err error) {
+func (c SpotOrderConfig) Has(orderId string) (has bool, err error) {
 	has, err = redisDB.HExists(context.Background(), c.RdsName(), orderId).Result()
 	return
 }
-func (c *SpotOrderConfig) Get(orderId string) (value SpotOrderItem, err error) {
+func (c SpotOrderConfig) Get(orderId string) (value SpotOrderItem, err error) {
 	ret, err1 := redisDB.HGet(context.Background(), c.RdsName(), orderId).Result()
 	if err1 != nil {
 		err = err1
@@ -92,7 +92,7 @@ func (c *SpotOrderConfig) Get(orderId string) (value SpotOrderItem, err error) {
 	return
 }
 
-func (c *SpotOrderConfig) Set(orderId string, value SpotOrderItem) (err error) {
+func (c SpotOrderConfig) Set(orderId string, value SpotOrderItem) (err error) {
 	buf, err := json.Marshal(value)
 	if err != nil {
 		return
@@ -104,7 +104,7 @@ func (c *SpotOrderConfig) Set(orderId string, value SpotOrderItem) (err error) {
 	return nil
 }
 
-func (c *SpotOrderConfig) Del(orderId string) (err error) {
+func (c SpotOrderConfig) Del(orderId string) (err error) {
 	err = redisDB.HDel(context.Background(), c.RdsName(), orderId).Err()
 	if err != nil {
 		return

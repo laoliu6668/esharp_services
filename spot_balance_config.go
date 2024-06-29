@@ -20,18 +20,18 @@ type SpotBalanceItem struct {
 }
 
 // example
-var SpotBalanceConfigExample = SpotBalanceConfig{
-	Exchange: "htx",
-	RdsData: map[string]SpotBalanceItem{
-		"BTC": {},
-	},
-}
+// var SpotBalanceConfigExample = SpotBalanceConfig{
+// 	Exchange: "htx",
+// 	RdsData: map[string]SpotBalanceItem{
+// 		"BTC": {},
+// 	},
+// }
 
-func (c *SpotBalanceConfig) RdsName() string {
+func (c SpotBalanceConfig) RdsName() string {
 	return fmt.Sprintf("%s_spot_balance_config", c.Exchange)
 }
 
-func (c *SpotBalanceConfig) Init() (err error) {
+func (c SpotBalanceConfig) Init() (err error) {
 	for k, v := range c.RdsData {
 		err = c.Set(k, v)
 		if err != nil {
@@ -41,7 +41,7 @@ func (c *SpotBalanceConfig) Init() (err error) {
 	return nil
 }
 
-func (c *SpotBalanceConfig) GetAll() (all map[string]SpotBalanceItem, err error) {
+func (c SpotBalanceConfig) GetAll() (all map[string]SpotBalanceItem, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -54,11 +54,11 @@ func (c *SpotBalanceConfig) GetAll() (all map[string]SpotBalanceItem, err error)
 	}
 	return all, err
 }
-func (c *SpotBalanceConfig) Has(key string) (has bool, err error) {
+func (c SpotBalanceConfig) Has(key string) (has bool, err error) {
 	has, err = redisDB.HExists(context.Background(), c.RdsName(), key).Result()
 	return
 }
-func (c *SpotBalanceConfig) Get(key string) (value SpotBalanceItem, err error) {
+func (c SpotBalanceConfig) Get(key string) (value SpotBalanceItem, err error) {
 	ret, err1 := redisDB.HGet(context.Background(), c.RdsName(), key).Result()
 	if err1 != nil {
 		err = err1
@@ -67,10 +67,10 @@ func (c *SpotBalanceConfig) Get(key string) (value SpotBalanceItem, err error) {
 	err = json.Unmarshal([]byte(ret), &value)
 	return
 }
-func (c *SpotBalanceConfig) Keys() (keys []string, err error) {
+func (c SpotBalanceConfig) Keys() (keys []string, err error) {
 	return redisDB.HKeys(context.Background(), c.RdsName()).Result()
 }
-func (c *SpotBalanceConfig) Vals() (vals []SpotBalanceItem, err error) {
+func (c SpotBalanceConfig) Vals() (vals []SpotBalanceItem, err error) {
 	strList, err := redisDB.HVals(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -83,7 +83,7 @@ func (c *SpotBalanceConfig) Vals() (vals []SpotBalanceItem, err error) {
 	}
 	return
 }
-func (c *SpotBalanceConfig) Set(key string, value SpotBalanceItem) (err error) {
+func (c SpotBalanceConfig) Set(key string, value SpotBalanceItem) (err error) {
 	value.Exchange = c.Exchange
 	buf, err := json.Marshal(value)
 	if err != nil {
@@ -95,7 +95,7 @@ func (c *SpotBalanceConfig) Set(key string, value SpotBalanceItem) (err error) {
 	}
 	return nil
 }
-func (c *SpotBalanceConfig) SetFreeBalance(key string, amount float64) (err error) {
+func (c SpotBalanceConfig) SetFreeBalance(key string, amount float64) (err error) {
 
 	vals, err := c.Get(key)
 	if err != nil {

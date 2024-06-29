@@ -25,18 +25,18 @@ type HedgeOrderConfig struct {
 }
 
 // example
-var HedgeOrderExample = HedgeOrderConfig{
-	ExchangeName: "htx",
-	RdsData: map[string]HedgeOrderItem{
-		"DOT": {},
-	},
-}
+// var HedgeOrderExample = HedgeOrderConfig{
+// 	ExchangeName: "htx",
+// 	RdsData: map[string]HedgeOrderItem{
+// 		"DOT": {},
+// 	},
+// }
 
-func (c *HedgeOrderConfig) RdsName() string {
+func (c HedgeOrderConfig) RdsName() string {
 	return fmt.Sprintf("%s_hedge_order_config", c.ExchangeName)
 }
 
-func (c *HedgeOrderConfig) Init() (err error) {
+func (c HedgeOrderConfig) Init() (err error) {
 	for k, v := range c.RdsData {
 		err = c.Set(k, v)
 		if err != nil {
@@ -45,10 +45,10 @@ func (c *HedgeOrderConfig) Init() (err error) {
 	}
 	return nil
 }
-func (c *HedgeOrderConfig) Keys() (all []string, err error) {
+func (c HedgeOrderConfig) Keys() (all []string, err error) {
 	return redisDB.HKeys(context.Background(), c.RdsName()).Result()
 }
-func (c *HedgeOrderConfig) GetAll() (all map[string]HedgeOrderItem, err error) {
+func (c HedgeOrderConfig) GetAll() (all map[string]HedgeOrderItem, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -61,7 +61,7 @@ func (c *HedgeOrderConfig) GetAll() (all map[string]HedgeOrderItem, err error) {
 	}
 	return all, err
 }
-func (c *HedgeOrderConfig) Vals() (all []HedgeOrderItem, err error) {
+func (c HedgeOrderConfig) Vals() (all []HedgeOrderItem, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -74,11 +74,11 @@ func (c *HedgeOrderConfig) Vals() (all []HedgeOrderItem, err error) {
 	}
 	return all, err
 }
-func (c *HedgeOrderConfig) Has(key string) (has bool, err error) {
+func (c HedgeOrderConfig) Has(key string) (has bool, err error) {
 	has, err = redisDB.HExists(context.Background(), c.RdsName(), key).Result()
 	return
 }
-func (c *HedgeOrderConfig) Get(key string) (value HedgeOrderItem, err error) {
+func (c HedgeOrderConfig) Get(key string) (value HedgeOrderItem, err error) {
 	ret, err1 := redisDB.HGet(context.Background(), c.RdsName(), key).Result()
 	if err1 != nil {
 		err = err1
@@ -88,7 +88,7 @@ func (c *HedgeOrderConfig) Get(key string) (value HedgeOrderItem, err error) {
 	return
 }
 
-func (c *HedgeOrderConfig) Set(key string, value HedgeOrderItem) (err error) {
+func (c HedgeOrderConfig) Set(key string, value HedgeOrderItem) (err error) {
 	buf, err := json.Marshal(value)
 	if err != nil {
 		return
@@ -100,7 +100,7 @@ func (c *HedgeOrderConfig) Set(key string, value HedgeOrderItem) (err error) {
 	return nil
 }
 
-func (c *HedgeOrderConfig) Del(key string) (err error) {
+func (c HedgeOrderConfig) Del(key string) (err error) {
 	err = redisDB.HDel(context.Background(), c.RdsName(), key).Err()
 	if err != nil {
 		return

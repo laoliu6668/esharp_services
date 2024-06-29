@@ -22,12 +22,12 @@ type SwapPositionConfig struct {
 }
 
 // example
-var SwapPositionConfigExample = SwapPositionConfig{
-	Exchange: "htx",
-	RdsData: map[string]SwapPositionItem{
-		"BTC": {},
-	},
-}
+// var SwapPositionConfigExample = SwapPositionConfig{
+// 	Exchange: "htx",
+// 	RdsData: map[string]SwapPositionItem{
+// 		"BTC": {},
+// 	},
+// }
 
 func (c SwapPositionConfig) RdsName() string {
 	return fmt.Sprintf("%s_swap_position_config", c.Exchange)

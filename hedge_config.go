@@ -13,23 +13,23 @@ type HedgeConfig struct {
 }
 
 // example
-var HedgeConfigExample = HedgeConfig{
-	RdsData: map[string]any{
-		"htx_htx_ETH": map[string]any{
-			"status":              true,
-			"symbol":              "ETH",
-			"spot_exchange":       "htx",
-			"swap_exchange":       "htx",
-			"open_rate":           2,
-			"close_rate":          0,
-			"swap_position_limit": 1000,
-			"configs": map[string]any{
-				"spot": map[string]any{},
-				"swap": map[string]any{},
-			},
-		},
-	},
-}
+// var HedgeConfigExample = HedgeConfig{
+// 	RdsData: map[string]any{
+// 		"htx_htx_ETH": map[string]any{
+// 			"status":              true,
+// 			"symbol":              "ETH",
+// 			"spot_exchange":       "htx",
+// 			"swap_exchange":       "htx",
+// 			"open_rate":           2,
+// 			"close_rate":          0,
+// 			"swap_position_limit": 1000,
+// 			"configs": map[string]any{
+// 				"spot": map[string]any{},
+// 				"swap": map[string]any{},
+// 			},
+// 		},
+// 	},
+// }
 
 func (c *HedgeConfig) RdsName() string {
 	return "hedge_config"

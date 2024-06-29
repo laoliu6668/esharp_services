@@ -30,18 +30,18 @@ type SwapOrderConfig struct {
 }
 
 // example
-var SwapOrderExample = SwapOrderConfig{
-	ExchangeName: "htx",
-	RdsData: map[string]SwapOrderItem{
-		"SPferwa1213": {},
-	},
-}
+// var SwapOrderExample = SwapOrderConfig{
+// 	ExchangeName: "htx",
+// 	RdsData: map[string]SwapOrderItem{
+// 		"SPferwa1213": {},
+// 	},
+// }
 
-func (c *SwapOrderConfig) RdsName() string {
+func (c SwapOrderConfig) RdsName() string {
 	return fmt.Sprintf("%s_swap_order_config", c.ExchangeName)
 }
 
-func (c *SwapOrderConfig) Init() (err error) {
+func (c SwapOrderConfig) Init() (err error) {
 	for k, v := range c.RdsData {
 		err = c.Set(k, v)
 		if err != nil {
@@ -50,10 +50,10 @@ func (c *SwapOrderConfig) Init() (err error) {
 	}
 	return nil
 }
-func (c *SwapOrderConfig) Keys() (all []string, err error) {
+func (c SwapOrderConfig) Keys() (all []string, err error) {
 	return redisDB.HKeys(context.Background(), c.RdsName()).Result()
 }
-func (c *SwapOrderConfig) GetAll() (all map[string]SwapOrderItem, err error) {
+func (c SwapOrderConfig) GetAll() (all map[string]SwapOrderItem, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -66,7 +66,7 @@ func (c *SwapOrderConfig) GetAll() (all map[string]SwapOrderItem, err error) {
 	}
 	return all, err
 }
-func (c *SwapOrderConfig) Vals() (all []SwapOrderItem, err error) {
+func (c SwapOrderConfig) Vals() (all []SwapOrderItem, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -79,11 +79,11 @@ func (c *SwapOrderConfig) Vals() (all []SwapOrderItem, err error) {
 	}
 	return all, err
 }
-func (c *SwapOrderConfig) Has(orderId string) (has bool, err error) {
+func (c SwapOrderConfig) Has(orderId string) (has bool, err error) {
 	has, err = redisDB.HExists(context.Background(), c.RdsName(), orderId).Result()
 	return
 }
-func (c *SwapOrderConfig) Get(orderId string) (value SwapOrderItem, err error) {
+func (c SwapOrderConfig) Get(orderId string) (value SwapOrderItem, err error) {
 	ret, err1 := redisDB.HGet(context.Background(), c.RdsName(), orderId).Result()
 	if err1 != nil {
 		err = err1
@@ -93,7 +93,7 @@ func (c *SwapOrderConfig) Get(orderId string) (value SwapOrderItem, err error) {
 	return
 }
 
-func (c *SwapOrderConfig) Set(orderId string, value SwapOrderItem) (err error) {
+func (c SwapOrderConfig) Set(orderId string, value SwapOrderItem) (err error) {
 	buf, err := json.Marshal(value)
 	if err != nil {
 		return
@@ -105,7 +105,7 @@ func (c *SwapOrderConfig) Set(orderId string, value SwapOrderItem) (err error) {
 	return nil
 }
 
-func (c *SwapOrderConfig) Del(orderId string) (err error) {
+func (c SwapOrderConfig) Del(orderId string) (err error) {
 	err = redisDB.HDel(context.Background(), c.RdsName(), orderId).Err()
 	if err != nil {
 		return

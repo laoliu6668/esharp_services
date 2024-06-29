@@ -21,18 +21,18 @@ type SwapSymbolConfig struct {
 }
 
 // example
-var SwapSymbolConfigExample = SwapSymbolConfig{
-	Exchange: "htx",
-	RdsData: map[string]SwapSymbolItem{
-		"BTC": {},
-	},
-}
+// var SwapSymbolConfigExample = SwapSymbolConfig{
+// 	Exchange: "htx",
+// 	RdsData: map[string]SwapSymbolItem{
+// 		"BTC": {},
+// 	},
+// }
 
-func (c *SwapSymbolConfig) RdsName() string {
+func (c SwapSymbolConfig) RdsName() string {
 	return fmt.Sprintf("%s_swap_symbol_config", c.Exchange)
 }
 
-func (c *SwapSymbolConfig) Init() (err error) {
+func (c SwapSymbolConfig) Init() (err error) {
 	for k, v := range c.RdsData {
 		err = c.Set(k, v)
 		if err != nil {
@@ -42,7 +42,7 @@ func (c *SwapSymbolConfig) Init() (err error) {
 	return nil
 }
 
-func (c *SwapSymbolConfig) GetAll() (all map[string]SwapSymbolItem, err error) {
+func (c SwapSymbolConfig) GetAll() (all map[string]SwapSymbolItem, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -55,15 +55,15 @@ func (c *SwapSymbolConfig) GetAll() (all map[string]SwapSymbolItem, err error) {
 	}
 	return all, err
 }
-func (c *SwapSymbolConfig) Has(key string) (has bool, err error) {
+func (c SwapSymbolConfig) Has(key string) (has bool, err error) {
 	has, err = redisDB.HExists(context.Background(), c.RdsName(), key).Result()
 	return
 }
 
-func (c *SwapSymbolConfig) Keys() (keys []string, err error) {
+func (c SwapSymbolConfig) Keys() (keys []string, err error) {
 	return redisDB.HKeys(context.Background(), c.RdsName()).Result()
 }
-func (c *SwapSymbolConfig) Vals() (vals []SwapSymbolItem, err error) {
+func (c SwapSymbolConfig) Vals() (vals []SwapSymbolItem, err error) {
 	strList, err := redisDB.HVals(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -76,7 +76,7 @@ func (c *SwapSymbolConfig) Vals() (vals []SwapSymbolItem, err error) {
 	}
 	return
 }
-func (c *SwapSymbolConfig) Get(key string) (value SwapSymbolItem, err error) {
+func (c SwapSymbolConfig) Get(key string) (value SwapSymbolItem, err error) {
 	ret, err1 := redisDB.HGet(context.Background(), c.RdsName(), key).Result()
 	if err1 != nil {
 		err = err1
@@ -86,7 +86,7 @@ func (c *SwapSymbolConfig) Get(key string) (value SwapSymbolItem, err error) {
 	return
 }
 
-func (c *SwapSymbolConfig) Set(key string, value SwapSymbolItem) (err error) {
+func (c SwapSymbolConfig) Set(key string, value SwapSymbolItem) (err error) {
 	buf, err := json.Marshal(value)
 	if err != nil {
 		return

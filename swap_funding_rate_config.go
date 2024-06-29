@@ -20,18 +20,18 @@ type SwapFundingConfig struct {
 }
 
 // example
-var SwapFundingConfigExample = SwapFundingConfig{
-	Exchange: "htx",
-	RdsData: map[string]SwapFundingRateItem{
-		"BTC": {},
-	},
-}
+// var SwapFundingConfigExample = SwapFundingConfig{
+// 	Exchange: "htx",
+// 	RdsData: map[string]SwapFundingRateItem{
+// 		"BTC": {},
+// 	},
+// }
 
-func (c *SwapFundingConfig) RdsName() string {
+func (c SwapFundingConfig) RdsName() string {
 	return fmt.Sprintf("%s_swap_funding_rate_config", c.Exchange)
 }
 
-func (c *SwapFundingConfig) Init() (err error) {
+func (c SwapFundingConfig) Init() (err error) {
 	for k, v := range c.RdsData {
 		err = c.Set(k, v)
 		if err != nil {
@@ -41,7 +41,7 @@ func (c *SwapFundingConfig) Init() (err error) {
 	return nil
 }
 
-func (c *SwapFundingConfig) GetAll() (all map[string]SwapFundingRateItem, err error) {
+func (c SwapFundingConfig) GetAll() (all map[string]SwapFundingRateItem, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -54,15 +54,15 @@ func (c *SwapFundingConfig) GetAll() (all map[string]SwapFundingRateItem, err er
 	}
 	return all, err
 }
-func (c *SwapFundingConfig) Has(key string) (has bool, err error) {
+func (c SwapFundingConfig) Has(key string) (has bool, err error) {
 	has, err = redisDB.HExists(context.Background(), c.RdsName(), key).Result()
 	return
 }
 
-func (c *SwapFundingConfig) Keys() (keys []string, err error) {
+func (c SwapFundingConfig) Keys() (keys []string, err error) {
 	return redisDB.HKeys(context.Background(), c.RdsName()).Result()
 }
-func (c *SwapFundingConfig) Vals() (vals []SwapFundingRateItem, err error) {
+func (c SwapFundingConfig) Vals() (vals []SwapFundingRateItem, err error) {
 	strList, err := redisDB.HVals(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -75,7 +75,7 @@ func (c *SwapFundingConfig) Vals() (vals []SwapFundingRateItem, err error) {
 	}
 	return
 }
-func (c *SwapFundingConfig) Get(key string) (value SwapFundingRateItem, err error) {
+func (c SwapFundingConfig) Get(key string) (value SwapFundingRateItem, err error) {
 	ret, err1 := redisDB.HGet(context.Background(), c.RdsName(), key).Result()
 	if err1 != nil {
 		err = err1
@@ -85,7 +85,7 @@ func (c *SwapFundingConfig) Get(key string) (value SwapFundingRateItem, err erro
 	return
 }
 
-func (c *SwapFundingConfig) Set(key string, value SwapFundingRateItem) (err error) {
+func (c SwapFundingConfig) Set(key string, value SwapFundingRateItem) (err error) {
 	value.Exchange = c.Exchange
 	buf, err := json.Marshal(value)
 	if err != nil {

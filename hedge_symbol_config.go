@@ -17,13 +17,13 @@ type HedgeSymbolDatas struct {
 }
 
 // example
-var HedgeSymbolConfigExample = HedgeSymbolConfig{
-	Exchange: "htx",
-	RdsData: HedgeSymbolDatas{
-		Spot: []string{"BTC", "ETH"},
-		Swap: []string{"ETH", "DOT", "LINK"},
-	},
-}
+// var HedgeSymbolConfigExample = HedgeSymbolConfig{
+// 	Exchange: "htx",
+// 	RdsData: HedgeSymbolDatas{
+// 		Spot: []string{"BTC", "ETH"},
+// 		Swap: []string{"ETH", "DOT", "LINK"},
+// 	},
+// }
 
 func (c HedgeSymbolConfig) RdsName() string {
 	return fmt.Sprintf("%s_hedge_symbol_config", c.Exchange)

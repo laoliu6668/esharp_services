@@ -27,25 +27,25 @@ type HedgeTickerConfig struct {
 }
 
 // example
-var HedgeTickerConfigExample = HedgeTickerConfig{
-	SpotExchange: "htx",
-	SwapExchange: "binance",
-	RdsData: map[string]HedgeTickerItem{
-		"htx_htx_BTC": {},
-	},
-}
+// var HedgeTickerConfigExample = HedgeTickerConfig{
+// 	SpotExchange: "htx",
+// 	SwapExchange: "binance",
+// 	RdsData: map[string]HedgeTickerItem{
+// 		"htx_htx_BTC": {},
+// 	},
+// }
 
-func (c *HedgeTickerConfig) RdsName() string {
+func (c HedgeTickerConfig) RdsName() string {
 	return "hedge_ticker"
 }
-func (c *HedgeTickerConfig) MQName() string {
+func (c HedgeTickerConfig) MQName() string {
 	return fmt.Sprintf("%s_%s_hedge_ticker", c.SpotExchange, c.SwapExchange)
 }
-func (c *HedgeTickerConfig) RdsHKey(spotExchange, swapExchange, symbol string) string {
+func (c HedgeTickerConfig) RdsHKey(spotExchange, swapExchange, symbol string) string {
 	return fmt.Sprintf("%s_%s_%s", spotExchange, swapExchange, symbol)
 }
 
-func (c *HedgeTickerConfig) Init() (err error) {
+func (c HedgeTickerConfig) Init() (err error) {
 	for k, v := range c.RdsData {
 		err = c.Set(k, v)
 		if err != nil {
@@ -55,7 +55,7 @@ func (c *HedgeTickerConfig) Init() (err error) {
 	return nil
 }
 
-func (c *HedgeTickerConfig) GetAll() (all map[string]HedgeTickerItem, err error) {
+func (c HedgeTickerConfig) GetAll() (all map[string]HedgeTickerItem, err error) {
 	res, err := redisDB.HGetAll(context.Background(), c.RdsName()).Result()
 	if err != nil {
 		return
@@ -68,11 +68,11 @@ func (c *HedgeTickerConfig) GetAll() (all map[string]HedgeTickerItem, err error)
 	}
 	return all, err
 }
-func (c *HedgeTickerConfig) Has(key string) (has bool, err error) {
+func (c HedgeTickerConfig) Has(key string) (has bool, err error) {
 	has, err = redisDB.HExists(context.Background(), c.RdsName(), key).Result()
 	return
 }
-func (c *HedgeTickerConfig) Get(key string) (value HedgeTickerItem, err error) {
+func (c HedgeTickerConfig) Get(key string) (value HedgeTickerItem, err error) {
 	ret, err1 := redisDB.HGet(context.Background(), c.RdsName(), key).Result()
 	if err1 != nil {
 		err = err1
@@ -81,10 +81,10 @@ func (c *HedgeTickerConfig) Get(key string) (value HedgeTickerItem, err error) {
 	err = json.Unmarshal([]byte(ret), &value)
 	return
 }
-func (c *HedgeTickerConfig) SetSymbol(symbol string, value HedgeTickerItem) (err error) {
+func (c HedgeTickerConfig) SetSymbol(symbol string, value HedgeTickerItem) (err error) {
 	return c.Set(c.RdsHKey(c.SpotExchange, c.SwapExchange, symbol), value)
 }
-func (c *HedgeTickerConfig) Set(key string, value HedgeTickerItem) (err error) {
+func (c HedgeTickerConfig) Set(key string, value HedgeTickerItem) (err error) {
 	buf, err := json.Marshal(value)
 	if err != nil {
 		return
