@@ -33,26 +33,27 @@ type HedgeSchemaItem struct {
 	TradeAmountPoint int64   `json:"trade_amount_point"` // 交易金额精度
 
 	ContractSize          float64 `json:"contract_size"`            // 合约面值
-	MaxBuyPositionVolume  int64   `json:"max_buy_position_volume"`  // 多仓持仓上限(张)
-	MaxSellPositionVolume int64   `json:"max_sell_position_volume"` // 空仓持仓上限(张)
-	MaxOpenOrderVolume    int64   `json:"max_open_order_volume"`    // 开仓单笔下单上限(张)
-	MaxCloseOrderVolume   int64   `json:"max_close_order_volume"`   // 平仓单笔下单上限(张)
+	MaxBuyPositionVolume  float64 `json:"max_buy_position_volume"`  // 多仓持仓上限(数量)
+	MaxSellPositionVolume float64 `json:"max_sell_position_volume"` // 空仓持仓上限(数量)
+	MaxOpenOrderVolume    float64 `json:"max_open_order_volume"`    // 开仓单笔下单上限(数量)
+	MaxCloseOrderVolume   float64 `json:"max_close_order_volume"`   // 平仓单笔下单上限(数量)
 	// group end 币对配置
 
-	Models              string  `json:"models"`                // c 对冲方案: spot_more_swap_less-现多期空 spot_less_swap_more-现空期多
-	OpenRate            float64 `json:"open_rate"`             // * 开仓差率
-	CloseRate           float64 `json:"close_rate"`            // * 平仓差率
-	SingleOrderVolume   int64   `json:"single_order_volume"`   // * 期货订单单笔张数(张)
-	PositionVolumeLimit int64   `json:"position_volume_limit"` // * 期货仓位持仓上限(张)
-
+	Models    string  `json:"models"`     // c 对冲方案: spot_more_swap_less-现多期空 spot_less_swap_more-现空期多
+	OpenRate  float64 `json:"open_rate"`  // * 开仓差率
+	CloseRate float64 `json:"close_rate"` // * 平仓差率
+	// SingleOrderVolume   int64   `json:"single_order_volume"`   // * 期货订单单笔张数(张)
+	PositionVolumeLimit float64 `json:"position_volume_limit"` // * 期货仓位持仓上限(数量)
+	SingleOrderValue    float64 `json:"single_order_value"`    // * 期货订单单笔价格(价格)
+	// PositionValueLimit float64 `json:"position_value_limit"` // * 期货仓位持仓上限(价格)
 	// 现空期多
 	SpotTotalBuyVolume      float64 `json:"spot_total_buy_volume"`       // 现货累积买入数量
 	SpotTotalBuyValue       float64 `json:"spot_total_buy_value"`        // 现货累积买入花费
 	SpotTotalSellVolume     float64 `json:"spot_total_sell_volume"`      // 现货累积卖出数量
 	SpotTotalSellValue      float64 `json:"spot_total_sell_value"`       // 现货累积卖出金额
-	SwapTotalSellOpenVolume int64   `json:"swap_total_sell_open_volume"` // 期货累积开空张数
+	SwapTotalSellOpenVolume float64 `json:"swap_total_sell_open_volume"` // 期货累积开空数量
 	SwapTotalSellOpenValue  float64 `json:"swap_total_sell_open_value"`  // 期货累积开空花费
-	SwapTotalBuyCloseVolume int64   `json:"swap_total_buy_close_volume"` // 期货累积平空张数
+	SwapTotalBuyCloseVolume float64 `json:"swap_total_buy_close_volume"` // 期货累积平空数量
 	SwapTotalBuyCloseValue  float64 `json:"swap_total_buy_close_value"`  // 期货累积平空金额
 
 	// 现多期空
@@ -60,9 +61,9 @@ type HedgeSchemaItem struct {
 	SpotTotalBorrowValue     float64 `json:"spot_total_borrow_value"`      // 现货累积借币花费
 	SpotTotalReturnVolume    float64 `json:"spot_total_return_volume"`     // 现货累积还币数量
 	SpotTotalReturnValue     float64 `json:"spot_total_return_value"`      // 现货累积还币金额
-	SwapTotalBuyOpenVolume   int64   `json:"swap_total_buy_volume"`        // 期货累积买入开多张数
+	SwapTotalBuyOpenVolume   float64 `json:"swap_total_buy_volume"`        // 期货累积买入开多数量
 	SwapTotalBuyOpenValue    float64 `json:"swap_total_buy_open_value"`    // 期货累积买入开多花费
-	SwapTotalSellCloseVolume int64   `json:"swap_total_sell_close_volume"` // 期货累积卖出平多张数
+	SwapTotalSellCloseVolume float64 `json:"swap_total_sell_close_volume"` // 期货累积卖出平多数量
 	SwapTotalSellCloseValue  float64 `json:"swap_total_sell_close_value"`  // 期货累积卖出平多金额
 
 	RelOpenRate  float64 `json:"rel_open_rate"`  // 实开差率
@@ -128,10 +129,10 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 	c.setInt(spot_exchange, swap_exchange, symbol, "trade_amount_point", spotSymbolItem.TradeAmountPoint)
 
 	c.setFloat(spot_exchange, swap_exchange, symbol, "contract_size", SwapSymbolitem.ContractSize)
-	c.setInt(spot_exchange, swap_exchange, symbol, "max_buy_position_volume", SwapSymbolitem.MaxBuyPositionVolume)
-	c.setInt(spot_exchange, swap_exchange, symbol, "max_sell_position_volume", SwapSymbolitem.MaxSellPositionVolume)
-	c.setInt(spot_exchange, swap_exchange, symbol, "max_open_order_volume", SwapSymbolitem.MaxOpenOrderVolume)
-	c.setInt(spot_exchange, swap_exchange, symbol, "max_close_order_volume", SwapSymbolitem.MaxCloseOrderVolume)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "max_buy_position_volume", SwapSymbolitem.MaxBuyPositionVolume)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "max_sell_position_volume", SwapSymbolitem.MaxSellPositionVolume)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "max_open_order_volume", SwapSymbolitem.MaxOpenOrderVolume)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "max_close_order_volume", SwapSymbolitem.MaxCloseOrderVolume)
 
 	// default value
 	c.setBool(spot_exchange, swap_exchange, symbol, "status", false)
@@ -139,25 +140,27 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 	c.setBool(spot_exchange, swap_exchange, symbol, "close_lock", false)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "open_rate", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "close_rate", 0)
-	c.setInt(spot_exchange, swap_exchange, symbol, "single_order_volume", 0)
-	c.setInt(spot_exchange, swap_exchange, symbol, "position_volume_limit", 0)
+	// c.setInt(spot_exchange, swap_exchange, symbol, "single_order_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "position_volume_limit", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "single_order_value", 0)
+	// c.setFloat(spot_exchange, swap_exchange, symbol, "position_value_limit", 0)
 
 	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_buy_volume", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_buy_value", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_sell_volume", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_sell_value", 0)
-	c.setInt(spot_exchange, swap_exchange, symbol, "swap_total_sell_open_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_sell_open_volume", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_sell_open_value", 0)
-	c.setInt(spot_exchange, swap_exchange, symbol, "swap_total_buy_close_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_buy_close_volume", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_buy_close_value", 0)
 
 	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_borrow_volume", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_borrow_value", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_return_volume", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_return_value", 0)
-	c.setInt(spot_exchange, swap_exchange, symbol, "swap_total_buy_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_buy_volume", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_buy_open_value", 0)
-	c.setInt(spot_exchange, swap_exchange, symbol, "swap_total_sell_close_volume", 0)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_sell_close_volume", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "swap_total_sell_close_value", 0)
 
 	c.setFloat(spot_exchange, swap_exchange, symbol, "rel_open_rate", 0)
@@ -281,13 +284,13 @@ func (c HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (ite
 		case "contract_size":
 			item.ContractSize = toFloat(v)
 		case "max_buy_position_volume":
-			item.MaxBuyPositionVolume = toInt(v)
+			item.MaxBuyPositionVolume = toFloat(v)
 		case "max_sell_position_volume":
-			item.MaxSellPositionVolume = toInt(v)
+			item.MaxSellPositionVolume = toFloat(v)
 		case "max_open_order_volume":
-			item.MaxOpenOrderVolume = toInt(v)
+			item.MaxOpenOrderVolume = toFloat(v)
 		case "max_close_order_amount":
-			item.MaxCloseOrderVolume = toInt(v)
+			item.MaxCloseOrderVolume = toFloat(v)
 		case "models":
 			item.Models = v
 		case "open_rate":
@@ -295,9 +298,9 @@ func (c HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (ite
 		case "close_rate":
 			item.CloseRate = toFloat(v)
 		case "single_order_volume":
-			item.SingleOrderVolume = toInt(v)
+			item.SingleOrderValue = toFloat(v)
 		case "position_volume_limit":
-			item.PositionVolumeLimit = toInt(v)
+			item.PositionVolumeLimit = toFloat(v)
 		case "spot_total_buy_volume":
 			item.SpotTotalBuyVolume = toFloat(v)
 		case "spot_total_buy_value":
@@ -307,11 +310,11 @@ func (c HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (ite
 		case "spot_total_sell_value":
 			item.SpotTotalSellValue = toFloat(v)
 		case "swap_total_sell_open_volume":
-			item.SwapTotalSellOpenVolume = toInt(v)
+			item.SwapTotalSellOpenVolume = toFloat(v)
 		case "swap_total_sell_open_value":
 			item.SwapTotalSellOpenValue = toFloat(v)
 		case "swap_total_buy_close_volume":
-			item.SwapTotalBuyCloseVolume = toInt(v)
+			item.SwapTotalBuyCloseVolume = toFloat(v)
 		case "swap_total_buy_close_value":
 			item.SwapTotalBuyCloseValue = toFloat(v)
 		case "spot_total_borrow_volume":
@@ -323,11 +326,11 @@ func (c HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (ite
 		case "spot_total_return_value":
 			item.SpotTotalReturnValue = toFloat(v)
 		case "swap_total_buy_volume":
-			item.SwapTotalBuyOpenVolume = toInt(v)
+			item.SwapTotalBuyOpenVolume = toFloat(v)
 		case "swap_total_buy_open_value":
 			item.SwapTotalBuyOpenValue = toFloat(v)
 		case "swap_total_sell_close_volume":
-			item.SwapTotalSellCloseVolume = toInt(v)
+			item.SwapTotalSellCloseVolume = toFloat(v)
 		case "swap_total_sell_close_value":
 			item.SwapTotalSellCloseValue = toFloat(v)
 		case "rel_open_rate":
@@ -415,7 +418,7 @@ func (c HedgeSchemaConfig) Del(spot_exchange, swap_exchange, symbol string) (err
 		Exchange: item.SwapExchange,
 	}
 	swapPositionItem, _ := sp.Get(item.Symbol)
-	var position int64
+	var position float64
 	if item.Models == SpotLessSwapMore {
 		position = swapPositionItem.BuyVolume
 	} else if item.Models == SpotMoreSwapLess {

@@ -11,8 +11,8 @@ import (
 type SwapPositionItem struct {
 	Exchange   string  `json:"exchange"`    // 交易所
 	Symbol     string  `json:"symbol"`      // 币对
-	BuyVolume  int64   `json:"buy_volume"`  // 多仓持仓张数
-	SellVolume int64   `json:"sell_volume"` // 空仓持仓张数
+	BuyVolume  float64 `json:"buy_volume"`  // 多仓持仓数量
+	SellVolume float64 `json:"sell_volume"` // 空仓持仓数量
 	UpdateAt   float64 `json:"update_at"`   // 更新时间 13位时间戳
 }
 

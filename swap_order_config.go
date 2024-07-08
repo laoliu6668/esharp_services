@@ -15,8 +15,8 @@ type SwapOrderItem struct {
 	TradePrice  float64 `json:"trade_price"`  // 成交价格
 	OrderValue  float64 `json:"order_value"`  // 下单金额
 	TradeValue  float64 `json:"trade_value"`  // 成交金额
-	OrderVolume int64   `json:"order_volume"` // 下单数量 张
-	TradeVolume int64   `json:"trade_volume"` // 成交数量 张
+	OrderVolume float64 `json:"order_volume"` // 下单数量
+	TradeVolume float64 `json:"trade_volume"` // 成交数量
 	Status      int64   `json:"status"`       // 订单状态 1-已下单 2-已成交 8-已撤单
 	CreateAt    int64   `json:"create_at"`    // 下单时间
 	FilledAt    int64   `json:"filled_at"`    // 成交时间
