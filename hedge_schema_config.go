@@ -296,7 +296,7 @@ func (c HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (ite
 			item.OpenRate = toFloat(v)
 		case "close_rate":
 			item.CloseRate = toFloat(v)
-		case "single_order_volume":
+		case "single_order_value":
 			item.SingleOrderValue = toFloat(v)
 		case "position_value_limit":
 			item.PositionValueLimit = toFloat(v)
