@@ -43,8 +43,8 @@ type HedgeSchemaItem struct {
 	OpenRate  float64 `json:"open_rate"`  // * 开仓差率
 	CloseRate float64 `json:"close_rate"` // * 平仓差率
 	// SingleOrderVolume   int64   `json:"single_order_volume"`   // * 期货订单单笔张数(张)
-	PositionVolumeLimit float64 `json:"position_value_limit"` // * 期货仓位持仓金额
-	SingleOrderValue    float64 `json:"single_order_value"`   // * 期货订单单笔金额(预计)
+	PositionValueLimit float64 `json:"position_value_limit"` // * 期货仓位持仓金额
+	SingleOrderValue   float64 `json:"single_order_value"`   // * 期货订单单笔金额(预计)
 	// 现空期多
 	SpotTotalBuyVolume      float64 `json:"spot_total_buy_volume"`       // 现货累积买入数量
 	SpotTotalBuyValue       float64 `json:"spot_total_buy_value"`        // 现货累积买入花费
@@ -299,7 +299,7 @@ func (c HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (ite
 		case "single_order_volume":
 			item.SingleOrderValue = toFloat(v)
 		case "position_value_limit":
-			item.PositionVolumeLimit = toFloat(v)
+			item.PositionValueLimit = toFloat(v)
 		case "spot_total_buy_volume":
 			item.SpotTotalBuyVolume = toFloat(v)
 		case "spot_total_buy_value":
