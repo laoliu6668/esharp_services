@@ -106,6 +106,28 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 	if err != nil {
 		return "", fmt.Errorf("spot symbol config error: %s", err)
 	}
+	tradeVolumePoint := spotSymbolItem.TradeVolumePoint
+	tradePricePoint := spotSymbolItem.TradePricePoint
+	tradeAmountPoint := spotSymbolItem.TradeAmountPoint
+	if spot_exchange != swap_exchange {
+		// 如果现货交易所和期货交易所不同
+		// 取最小精度
+		spotSymbolItem_swap, err := (&SpotSymbolConfig{
+			Exchange: swap_exchange,
+		}).Get(symbol)
+		if err != nil {
+			return "", fmt.Errorf("swapExchange's spot symbol config error: %s", err)
+		}
+		if spotSymbolItem_swap.TradeVolumePoint < tradeVolumePoint {
+			tradeVolumePoint = spotSymbolItem_swap.TradeVolumePoint
+		}
+		if spotSymbolItem_swap.TradePricePoint < tradePricePoint {
+			tradePricePoint = spotSymbolItem_swap.TradePricePoint
+		}
+		if spotSymbolItem_swap.TradeAmountPoint < tradeAmountPoint {
+			tradeAmountPoint = spotSymbolItem_swap.TradeAmountPoint
+		}
+	}
 	SwapSymbolitem, err := (&SwapSymbolConfig{
 		Exchange: swap_exchange,
 	}).Get(symbol)
@@ -123,9 +145,9 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 
 	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_volume", spotSymbolItem.MinOrderVolume)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_amount", spotSymbolItem.MinOrderAmount)
-	c.setInt(spot_exchange, swap_exchange, symbol, "trade_volume_point", spotSymbolItem.TradeVolumePoint)
-	c.setInt(spot_exchange, swap_exchange, symbol, "trade_price_point", spotSymbolItem.TradePricePoint)
-	c.setInt(spot_exchange, swap_exchange, symbol, "trade_amount_point", spotSymbolItem.TradeAmountPoint)
+	c.setInt(spot_exchange, swap_exchange, symbol, "trade_volume_point", tradeVolumePoint) // 取最小
+	c.setInt(spot_exchange, swap_exchange, symbol, "trade_price_point", tradePricePoint)   // 取最小
+	c.setInt(spot_exchange, swap_exchange, symbol, "trade_amount_point", tradeAmountPoint) // 取最小
 
 	c.setFloat(spot_exchange, swap_exchange, symbol, "contract_size", SwapSymbolitem.ContractSize)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "max_buy_position_volume", SwapSymbolitem.MaxBuyPositionVolume)
