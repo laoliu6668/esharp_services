@@ -46,7 +46,7 @@ type HedgeSchemaItem struct {
 	PositionValueLimit float64 `json:"position_value_limit"` // * 期货仓位持仓金额
 	SingleOrderValue   float64 `json:"single_order_value"`   // * 期货订单单笔金额(预计)
 
-	MinOrderVolumeRate float64 `json:"min_order_volume_rate"` // * 最小下单量比 default:50%
+	MinOrderVolumeRate float64 `json:"min_order_volume_rate"` // * 最小下单量比 default:50(%)
 
 	// 现空期多
 	SpotTotalBuyVolume      float64 `json:"spot_total_buy_volume"`       // 现货累积买入数量
@@ -175,7 +175,7 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 	// c.setInt(spot_exchange, swap_exchange, symbol, "single_order_volume", 0)
 	// c.setFloat(spot_exchange, swap_exchange, symbol, "position_volume_limit", 0)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "single_order_value", 0)
-	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_volume_rate", 0.5)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_volume_rate", 50)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "position_value_limit", 0)
 
 	c.setFloat(spot_exchange, swap_exchange, symbol, "spot_total_buy_volume", 0)
