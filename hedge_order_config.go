@@ -7,11 +7,15 @@ import (
 )
 
 type HedgeOrderItem struct {
-	SpotExchange string `json:"spot_exchange"` // 现货交易所
-	SwapExchange string `json:"swap_exchange"` // 期货交易所
-	Symbol       string `json:"symbol"`        // 币对
-	SpotOrderId  string `json:"spot_order_id"` // 现货订单ID
-	SwapOrderId  string `json:"swap_order_id"` // 期货订单ID
+	SpotExchange    string  `json:"spot_exchange"`     // 现货交易所
+	SwapExchange    string  `json:"swap_exchange"`     // 期货交易所
+	Symbol          string  `json:"symbol"`            // 币对
+	SpotOrderId     string  `json:"spot_order_id"`     // 现货订单ID
+	SwapOrderId     string  `json:"swap_order_id"`     // 期货订单ID
+	SpotTickerPrice float64 `json:"spot_ticker_price"` // 现货行情价
+	SwapTickerPrice float64 `json:"swap_ticker_price"` // 期货行情价
+	SpotTickerSize  float64 `json:"spot_ticker_size"`  // 现货交易量
+	SwapTickerSize  float64 `json:"swap_ticker_size"`  // 期货交易量
 }
 
 // 对冲方案订单双向队列
