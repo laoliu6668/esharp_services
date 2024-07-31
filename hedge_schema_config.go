@@ -221,6 +221,7 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 				MaxSellPositionVolume: SwapSymbolitem.MaxSellPositionVolume,
 				MaxOpenOrderVolume:    SwapSymbolitem.MaxOpenOrderVolume,
 				MaxCloseOrderVolume:   SwapSymbolitem.MaxCloseOrderVolume,
+				MinOrderVolumeRate:    50,
 				Status:                false,
 				OpenLock:              false,
 				CloseLock:             false,
