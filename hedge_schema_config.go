@@ -113,37 +113,26 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 	tradePricePoint := spotSymbolItem.TradePricePoint
 	tradeAmountPoint := spotSymbolItem.TradeAmountPoint
 	minOrderVolume := spotSymbolItem.MinOrderVolume
-	MinOrderAmount := spotSymbolItem.MinOrderAmount
-	if spot_exchange != swap_exchange {
-		// 如果现货交易所和期货交易所不同
-		// 取最小精度
-		spotSymbolItem_swap, err := (&SpotSymbolConfig{
-			Exchange: swap_exchange,
-		}).Get(symbol)
-		if err != nil {
-			return "", fmt.Errorf("swapExchange's spot symbol config error: %s", err)
-		}
-		if spotSymbolItem_swap.TradeVolumePoint < tradeVolumePoint {
-			tradeVolumePoint = spotSymbolItem_swap.TradeVolumePoint
-		}
-		if spotSymbolItem_swap.TradePricePoint < tradePricePoint {
-			tradePricePoint = spotSymbolItem_swap.TradePricePoint
-		}
-		if spotSymbolItem_swap.TradeAmountPoint < tradeAmountPoint {
-			tradeAmountPoint = spotSymbolItem_swap.TradeAmountPoint
-		}
-		if spotSymbolItem_swap.MinOrderVolume > minOrderVolume {
-			minOrderVolume = spotSymbolItem_swap.MinOrderVolume
-		}
-		if spotSymbolItem_swap.MinOrderAmount > MinOrderAmount {
-			MinOrderAmount = spotSymbolItem_swap.MinOrderAmount
-		}
-	}
-	SwapSymbolitem, err := (&SwapSymbolConfig{
-		Exchange: swap_exchange,
-	}).Get(symbol)
+	minOrderAmount := spotSymbolItem.MinOrderAmount
+	// 获取期货币对配置
+	swapSymbolItem, err := SwapSymbolConfig{Exchange: swap_exchange}.Get(symbol)
 	if err != nil {
-		return "", fmt.Errorf("swap symbol config error: %s", err)
+		return "", fmt.Errorf("swapExchange's symbol config error: %s", err)
+	}
+	if swapSymbolItem.TradeVolumePoint < tradeVolumePoint {
+		tradeVolumePoint = swapSymbolItem.TradeVolumePoint
+	}
+	if swapSymbolItem.TradePricePoint < tradePricePoint {
+		tradePricePoint = swapSymbolItem.TradePricePoint
+	}
+	if swapSymbolItem.TradeAmountPoint < tradeAmountPoint {
+		tradeAmountPoint = swapSymbolItem.TradeAmountPoint
+	}
+	if swapSymbolItem.MinOrderVolume > minOrderVolume {
+		minOrderVolume = swapSymbolItem.MinOrderVolume
+	}
+	if swapSymbolItem.MinOrderAmount > minOrderAmount {
+		minOrderAmount = swapSymbolItem.MinOrderAmount
 	}
 	err = redisDB_H.HSet(context.Background(), rdsName, "id", id).Err()
 	if err != nil {
@@ -155,16 +144,16 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 	c.set(spot_exchange, swap_exchange, symbol, "models", model)
 
 	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_volume", minOrderVolume)   // 取最大
-	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_amount", MinOrderAmount)   // 取最大
+	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_amount", minOrderAmount)   // 取最大
 	c.setInt(spot_exchange, swap_exchange, symbol, "trade_volume_point", tradeVolumePoint) // 取最小
 	c.setInt(spot_exchange, swap_exchange, symbol, "trade_price_point", tradePricePoint)   // 取最小
 	c.setInt(spot_exchange, swap_exchange, symbol, "trade_amount_point", tradeAmountPoint) // 取最小
 
-	c.setFloat(spot_exchange, swap_exchange, symbol, "contract_size", SwapSymbolitem.ContractSize)
-	c.setFloat(spot_exchange, swap_exchange, symbol, "max_buy_position_volume", SwapSymbolitem.MaxBuyPositionVolume)
-	c.setFloat(spot_exchange, swap_exchange, symbol, "max_sell_position_volume", SwapSymbolitem.MaxSellPositionVolume)
-	c.setFloat(spot_exchange, swap_exchange, symbol, "max_open_order_volume", SwapSymbolitem.MaxOpenOrderVolume)
-	c.setFloat(spot_exchange, swap_exchange, symbol, "max_close_order_volume", SwapSymbolitem.MaxCloseOrderVolume)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "contract_size", swapSymbolItem.ContractSize)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "max_buy_position_volume", swapSymbolItem.MaxBuyPositionVolume)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "max_sell_position_volume", swapSymbolItem.MaxSellPositionVolume)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "max_open_order_volume", swapSymbolItem.MaxOpenOrderVolume)
+	c.setFloat(spot_exchange, swap_exchange, symbol, "max_close_order_volume", swapSymbolItem.MaxCloseOrderVolume)
 
 	// default value
 	c.setBool(spot_exchange, swap_exchange, symbol, "status", false)
@@ -211,16 +200,16 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 				SwapExchange:          swap_exchange,
 				Symbol:                symbol,
 				Models:                model,
-				MinOrderVolume:        spotSymbolItem.MinOrderVolume,
-				MinOrderAmount:        spotSymbolItem.MinOrderAmount,
-				TradeVolumePoint:      spotSymbolItem.TradeVolumePoint,
-				TradePricePoint:       spotSymbolItem.TradePricePoint,
-				TradeAmountPoint:      spotSymbolItem.TradeAmountPoint,
-				ContractSize:          SwapSymbolitem.ContractSize,
-				MaxBuyPositionVolume:  SwapSymbolitem.MaxBuyPositionVolume,
-				MaxSellPositionVolume: SwapSymbolitem.MaxSellPositionVolume,
-				MaxOpenOrderVolume:    SwapSymbolitem.MaxOpenOrderVolume,
-				MaxCloseOrderVolume:   SwapSymbolitem.MaxCloseOrderVolume,
+				MinOrderVolume:        minOrderVolume,
+				MinOrderAmount:        minOrderAmount,
+				TradeVolumePoint:      tradeVolumePoint,
+				TradePricePoint:       tradePricePoint,
+				TradeAmountPoint:      tradeAmountPoint,
+				ContractSize:          swapSymbolItem.ContractSize,
+				MaxBuyPositionVolume:  swapSymbolItem.MaxBuyPositionVolume,
+				MaxSellPositionVolume: swapSymbolItem.MaxSellPositionVolume,
+				MaxOpenOrderVolume:    swapSymbolItem.MaxOpenOrderVolume,
+				MaxCloseOrderVolume:   swapSymbolItem.MaxCloseOrderVolume,
 				MinOrderVolumeRate:    50,
 				Status:                false,
 				OpenLock:              false,

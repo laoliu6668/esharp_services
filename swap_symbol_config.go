@@ -13,6 +13,11 @@ type SwapSymbolItem struct {
 	MaxSellPositionVolume float64 `json:"max_sell_position_volume"` // 空仓持仓上限(数量)
 	MaxOpenOrderVolume    float64 `json:"max_open_order_volume"`    // 开仓单笔下单上限(数量)
 	MaxCloseOrderVolume   float64 `json:"max_close_order_volume"`   // 平仓单笔下单上限(数量)
+	MinOrderVolume        float64 `json:"min_order_volume"`         // 最小下单数量
+	MinOrderAmount        float64 `json:"min_order_amount"`         // 最小下单金额
+	TradeVolumePoint      int64   `json:"trade_volume_point"`       // 交易数量精度
+	TradePricePoint       int64   `json:"trade_price_point"`        // 交易价格精度
+	TradeAmountPoint      int64   `json:"trade_amount_point"`       // 交易金额精度
 }
 
 type SwapSymbolConfig struct {
