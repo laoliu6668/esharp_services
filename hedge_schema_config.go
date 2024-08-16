@@ -119,21 +119,25 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 	if err != nil {
 		return "", fmt.Errorf("swapExchange's symbol config error: %s", err)
 	}
-	if swapSymbolItem.TradeVolumePoint < tradeVolumePoint {
-		tradeVolumePoint = swapSymbolItem.TradeVolumePoint
+	// 有面值则不需要精度
+	if swapSymbolItem.ContractSize != 0 {
+		if swapSymbolItem.TradeVolumePoint < tradeVolumePoint {
+			tradeVolumePoint = swapSymbolItem.TradeVolumePoint
+		}
+		if swapSymbolItem.TradePricePoint < tradePricePoint {
+			tradePricePoint = swapSymbolItem.TradePricePoint
+		}
+		if swapSymbolItem.TradeAmountPoint < tradeAmountPoint {
+			tradeAmountPoint = swapSymbolItem.TradeAmountPoint
+		}
+		if swapSymbolItem.MinOrderVolume > minOrderVolume {
+			minOrderVolume = swapSymbolItem.MinOrderVolume
+		}
+		if swapSymbolItem.MinOrderAmount > minOrderAmount {
+			minOrderAmount = swapSymbolItem.MinOrderAmount
+		}
 	}
-	if swapSymbolItem.TradePricePoint < tradePricePoint {
-		tradePricePoint = swapSymbolItem.TradePricePoint
-	}
-	if swapSymbolItem.TradeAmountPoint < tradeAmountPoint {
-		tradeAmountPoint = swapSymbolItem.TradeAmountPoint
-	}
-	if swapSymbolItem.MinOrderVolume > minOrderVolume {
-		minOrderVolume = swapSymbolItem.MinOrderVolume
-	}
-	if swapSymbolItem.MinOrderAmount > minOrderAmount {
-		minOrderAmount = swapSymbolItem.MinOrderAmount
-	}
+
 	err = redisDB_H.HSet(context.Background(), rdsName, "id", id).Err()
 	if err != nil {
 		return "", fmt.Errorf("redis set id error: %s", err)
