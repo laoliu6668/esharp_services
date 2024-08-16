@@ -120,7 +120,7 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 		return "", fmt.Errorf("swapExchange's symbol config error: %s", err)
 	}
 	// 有面值则不需要精度
-	if swapSymbolItem.ContractSize != 0 {
+	if swapSymbolItem.ContractSize == 0 {
 		if swapSymbolItem.TradeVolumePoint < tradeVolumePoint {
 			tradeVolumePoint = swapSymbolItem.TradeVolumePoint
 		}
