@@ -11,6 +11,7 @@ import (
 const (
 	EXCHANGE_HTX     = "htx"
 	EXCHANGE_BINANCE = "binance"
+	EXCHANGE_BITGET  = "bitget"
 )
 
 var schemaCh *amqp091.Channel
