@@ -137,9 +137,9 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 		if swapSymbolItem.TradePricePoint < tradePricePoint {
 			tradePricePoint = swapSymbolItem.TradePricePoint
 		}
-		if swapSymbolItem.TradeAmountPoint < tradeAmountPoint {
-			tradeAmountPoint = swapSymbolItem.TradeAmountPoint
-		}
+		// if swapSymbolItem.TradeAmountPoint < tradeAmountPoint {
+		// 	tradeAmountPoint = swapSymbolItem.TradeAmountPoint
+		// }
 		if swapSymbolItem.MinOrderVolume > minOrderVolume {
 			minOrderVolume = swapSymbolItem.MinOrderVolume
 		}
