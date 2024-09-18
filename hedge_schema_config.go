@@ -291,7 +291,6 @@ func (c HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (ite
 		tagJson := field.Tag.Get("json")
 		for k, v := range itemVals {
 			if k == tagJson {
-				fmt.Println("tagJson: ", tagJson, ", v: ", v, "type: ", field.Type.Kind().String())
 				tn := field.Type.Kind().String()
 				vf := vs.Elem().Field(i)
 				switch tn {
