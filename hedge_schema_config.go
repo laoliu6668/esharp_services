@@ -29,6 +29,7 @@ type HedgeSchemaItem struct {
 	// group start 币对配置
 	MinOrderVolume       float64 `json:"min_order_volume"`        // 最小下单数量
 	MinOrderAmount       float64 `json:"min_order_amount"`        // 最小下单金额
+	TradeVolumePoint     int64   `json:"trade_volume_point"`      // 最小交易数量精度
 	SpotTradeVolumePoint int64   `json:"spot_trade_volume_point"` // 现货交易数量精度
 	SwapTradeVolumePoint int64   `json:"swap_trade_volume_point"` // 期货交易数量精度
 	TradePricePoint      int64   `json:"trade_price_point"`       // 交易价格精度
@@ -116,6 +117,7 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 	tradeAmountPoint := spotSymbolItem.TradeAmountPoint
 	minOrderVolume := spotSymbolItem.MinOrderVolume
 	minOrderAmount := spotSymbolItem.MinOrderAmount
+	tradeVolumePoint := spotSymbolItem.TradeVolumePoint
 	// 获取期货币对配置
 	swapSymbolItem, err := SwapSymbolConfig{Exchange: swap_exchange}.Get(symbol)
 	if err != nil {
@@ -124,6 +126,14 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 	swapTradeVolumePoint := swapSymbolItem.TradeVolumePoint
 	// 有面值则不需要精度
 	if swapSymbolItem.ContractSize == 0 {
+
+		if swapSymbolItem.TradeVolumePoint < tradeVolumePoint {
+			tradeVolumePoint = swapSymbolItem.TradeVolumePoint
+		}
+
+		if swapSymbolItem.TradePricePoint < tradePricePoint {
+			tradePricePoint = swapSymbolItem.TradePricePoint
+		}
 		if swapSymbolItem.TradePricePoint < tradePricePoint {
 			tradePricePoint = swapSymbolItem.TradePricePoint
 		}
@@ -149,6 +159,7 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 
 	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_volume", minOrderVolume)            // 取最大
 	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_amount", minOrderAmount)            // 取最大
+	c.setInt(spot_exchange, swap_exchange, symbol, "spot_trade_volume_point", tradeVolumePoint)     // 取最小
 	c.setInt(spot_exchange, swap_exchange, symbol, "spot_trade_volume_point", spotTradeVolumePoint) // 现货
 	c.setInt(spot_exchange, swap_exchange, symbol, "swap_trade_volume_point", swapTradeVolumePoint) // 期货
 	c.setInt(spot_exchange, swap_exchange, symbol, "trade_price_point", tradePricePoint)            // 取最小
