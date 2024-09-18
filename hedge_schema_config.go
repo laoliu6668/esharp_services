@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -26,11 +27,12 @@ type HedgeSchemaItem struct {
 	SwapExchange string `json:"swap_exchange"` // c 期货交易所
 
 	// group start 币对配置
-	MinOrderVolume   float64 `json:"min_order_volume"`   // 最小下单数量
-	MinOrderAmount   float64 `json:"min_order_amount"`   // 最小下单金额
-	TradeVolumePoint int64   `json:"trade_volume_point"` // 交易数量精度
-	TradePricePoint  int64   `json:"trade_price_point"`  // 交易价格精度
-	TradeAmountPoint int64   `json:"trade_amount_point"` // 交易金额精度
+	MinOrderVolume       float64 `json:"min_order_volume"`        // 最小下单数量
+	MinOrderAmount       float64 `json:"min_order_amount"`        // 最小下单金额
+	SpotTradeVolumePoint int64   `json:"spot_trade_volume_point"` // 现货交易数量精度
+	SwapTradeVolumePoint int64   `json:"swap_trade_volume_point"` // 期货交易数量精度
+	TradePricePoint      int64   `json:"trade_price_point"`       // 交易价格精度
+	TradeAmountPoint     int64   `json:"trade_amount_point"`      // 交易金额精度
 
 	ContractSize          float64 `json:"contract_size"`            // 合约面值
 	MaxBuyPositionVolume  float64 `json:"max_buy_position_volume"`  // 多仓持仓上限(数量)
@@ -109,7 +111,7 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 	if err != nil {
 		return "", fmt.Errorf("spot symbol config error: %s", err)
 	}
-	tradeVolumePoint := spotSymbolItem.TradeVolumePoint
+	spotTradeVolumePoint := spotSymbolItem.TradeVolumePoint
 	tradePricePoint := spotSymbolItem.TradePricePoint
 	tradeAmountPoint := spotSymbolItem.TradeAmountPoint
 	minOrderVolume := spotSymbolItem.MinOrderVolume
@@ -119,11 +121,9 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 	if err != nil {
 		return "", fmt.Errorf("swapExchange's symbol config error: %s", err)
 	}
+	swapTradeVolumePoint := swapSymbolItem.TradeVolumePoint
 	// 有面值则不需要精度
 	if swapSymbolItem.ContractSize == 0 {
-		if swapSymbolItem.TradeVolumePoint < tradeVolumePoint {
-			tradeVolumePoint = swapSymbolItem.TradeVolumePoint
-		}
 		if swapSymbolItem.TradePricePoint < tradePricePoint {
 			tradePricePoint = swapSymbolItem.TradePricePoint
 		}
@@ -147,11 +147,12 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 	c.set(spot_exchange, swap_exchange, symbol, "swap_exchange", swap_exchange)
 	c.set(spot_exchange, swap_exchange, symbol, "models", model)
 
-	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_volume", minOrderVolume)   // 取最大
-	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_amount", minOrderAmount)   // 取最大
-	c.setInt(spot_exchange, swap_exchange, symbol, "trade_volume_point", tradeVolumePoint) // 取最小
-	c.setInt(spot_exchange, swap_exchange, symbol, "trade_price_point", tradePricePoint)   // 取最小
-	c.setInt(spot_exchange, swap_exchange, symbol, "trade_amount_point", tradeAmountPoint) // 取最小
+	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_volume", minOrderVolume)            // 取最大
+	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_amount", minOrderAmount)            // 取最大
+	c.setInt(spot_exchange, swap_exchange, symbol, "spot_trade_volume_point", spotTradeVolumePoint) // 现货
+	c.setInt(spot_exchange, swap_exchange, symbol, "swap_trade_volume_point", swapTradeVolumePoint) // 期货
+	c.setInt(spot_exchange, swap_exchange, symbol, "trade_price_point", tradePricePoint)            // 取最小
+	c.setInt(spot_exchange, swap_exchange, symbol, "trade_amount_point", tradeAmountPoint)          // 取最小
 
 	c.setFloat(spot_exchange, swap_exchange, symbol, "contract_size", swapSymbolItem.ContractSize)
 	c.setFloat(spot_exchange, swap_exchange, symbol, "max_buy_position_volume", swapSymbolItem.MaxBuyPositionVolume)
@@ -206,7 +207,8 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 				Models:                model,
 				MinOrderVolume:        minOrderVolume,
 				MinOrderAmount:        minOrderAmount,
-				TradeVolumePoint:      tradeVolumePoint,
+				SpotTradeVolumePoint:  spotTradeVolumePoint,
+				SwapTradeVolumePoint:  swapTradeVolumePoint,
 				TradePricePoint:       tradePricePoint,
 				TradeAmountPoint:      tradeAmountPoint,
 				ContractSize:          swapSymbolItem.ContractSize,
@@ -282,96 +284,29 @@ func (c HedgeSchemaConfig) Get(spot_exchange, swap_exchange, symbol string) (ite
 		return
 	}
 	item = HedgeSchemaItem{}
-	for k, v := range itemVals {
-		switch k {
-		case "id":
-			item.Id = v
-		case "status":
-			item.Status = toBool(v)
-		case "open_lock":
-			item.OpenLock = toBool(v)
-		case "close_lock":
-			item.CloseLock = toBool(v)
-		case "symbol":
-			item.Symbol = v
-		case "spot_exchange":
-			item.SpotExchange = v
-		case "swap_exchange":
-			item.SwapExchange = v
-		case "min_order_volume":
-			item.MinOrderVolume = toFloat(v)
-		case "min_order_amount":
-			item.MinOrderAmount = toFloat(v)
-		case "trade_volume_point":
-			item.TradeVolumePoint = toInt(v)
-		case "trade_price_point":
-			item.TradePricePoint = toInt(v)
-		case "trade_amount_point":
-			item.TradeAmountPoint = toInt(v)
-		case "contract_size":
-			item.ContractSize = toFloat(v)
-		case "max_buy_position_volume":
-			item.MaxBuyPositionVolume = toFloat(v)
-		case "max_sell_position_volume":
-			item.MaxSellPositionVolume = toFloat(v)
-		case "max_open_order_volume":
-			item.MaxOpenOrderVolume = toFloat(v)
-		case "max_close_order_amount":
-			item.MaxCloseOrderVolume = toFloat(v)
-		case "models":
-			item.Models = v
-		case "open_rate":
-			item.OpenRate = toFloat(v)
-		case "close_rate":
-			item.CloseRate = toFloat(v)
-		case "single_order_value":
-			item.SingleOrderValue = toFloat(v)
-		case "min_order_volume_rate":
-			item.MinOrderVolumeRate = toFloat(v)
-		case "position_value_limit":
-			item.PositionValueLimit = toFloat(v)
-		case "spot_total_buy_volume":
-			item.SpotTotalBuyVolume = toFloat(v)
-		case "spot_total_buy_value":
-			item.SpotTotalBuyValue = toFloat(v)
-		case "spot_total_sell_volume":
-			item.SpotTotalSellVolume = toFloat(v)
-		case "spot_total_sell_value":
-			item.SpotTotalSellValue = toFloat(v)
-		case "swap_total_sell_open_volume":
-			item.SwapTotalSellOpenVolume = toFloat(v)
-		case "swap_total_sell_open_value":
-			item.SwapTotalSellOpenValue = toFloat(v)
-		case "swap_total_buy_close_volume":
-			item.SwapTotalBuyCloseVolume = toFloat(v)
-		case "swap_total_buy_close_value":
-			item.SwapTotalBuyCloseValue = toFloat(v)
-		case "spot_total_borrow_volume":
-			item.SpotTotalBorrowVolume = toFloat(v)
-		case "spot_total_borrow_value":
-			item.SpotTotalBorrowValue = toFloat(v)
-		case "spot_total_return_volume":
-			item.SpotTotalReturnVolume = toFloat(v)
-		case "spot_total_return_value":
-			item.SpotTotalReturnValue = toFloat(v)
-		case "swap_total_buy_volume":
-			item.SwapTotalBuyOpenVolume = toFloat(v)
-		case "swap_total_buy_open_value":
-			item.SwapTotalBuyOpenValue = toFloat(v)
-		case "swap_total_sell_close_volume":
-			item.SwapTotalSellCloseVolume = toFloat(v)
-		case "swap_total_sell_close_value":
-			item.SwapTotalSellCloseValue = toFloat(v)
-		case "rel_open_rate":
-			item.RelOpenRate = toFloat(v)
-		case "rel_close_rate":
-			item.RelCloseRate = toFloat(v)
-		case "rel_pl":
-			item.RelPl = toFloat(v)
-		case "created_at":
-			item.CreatedAt = toInt(v)
+	ts := reflect.TypeOf(item)
+	vs := reflect.ValueOf(&item)
+	for i := 0; i < ts.NumField(); i++ {
+		field := ts.Field(i)
+		tagJson := field.Tag.Get("json")
+		for k, v := range itemVals {
+			if k == tagJson {
+				fmt.Println("tagJson: ", tagJson, ", v: ", v, "type: ", field.Type.Kind().String())
+				tn := field.Type.Kind().String()
+				vf := vs.Elem().Field(i)
+				switch tn {
+				case "bool":
+					vf.SetBool(toBool(v))
+				case "float64":
+					vf.SetFloat(toFloat(v))
+				case "string":
+					vf.SetString(v)
+				case "int64":
+					vf.SetInt(toInt(v))
+				}
+				break
+			}
 		}
-
 	}
 	return
 }
@@ -394,7 +329,6 @@ func (c HedgeSchemaConfig) Set(spot_exchange, swap_exchange, symbol, field, valu
 	PublishToHedgeSchema(buf)
 	return nil
 }
-
 func (c HedgeSchemaConfig) set(spot_exchange, swap_exchange, symbol, field, value string) (err error) {
 	key := c.RdsName(spot_exchange, swap_exchange, symbol)
 	has, err := redisDB_H.Exists(context.Background(), key).Result()
