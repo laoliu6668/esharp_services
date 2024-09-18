@@ -159,7 +159,7 @@ func (c HedgeSchemaConfig) Add(spot_exchange, swap_exchange, symbol, model strin
 
 	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_volume", minOrderVolume)            // 取最大
 	c.setFloat(spot_exchange, swap_exchange, symbol, "min_order_amount", minOrderAmount)            // 取最大
-	c.setInt(spot_exchange, swap_exchange, symbol, "spot_trade_volume_point", tradeVolumePoint)     // 取最小
+	c.setInt(spot_exchange, swap_exchange, symbol, "trade_volume_point", tradeVolumePoint)          // 取最小
 	c.setInt(spot_exchange, swap_exchange, symbol, "spot_trade_volume_point", spotTradeVolumePoint) // 现货
 	c.setInt(spot_exchange, swap_exchange, symbol, "swap_trade_volume_point", swapTradeVolumePoint) // 期货
 	c.setInt(spot_exchange, swap_exchange, symbol, "trade_price_point", tradePricePoint)            // 取最小
