@@ -108,6 +108,15 @@ func (c SwapAccountConfig) Set(key string, value SwapAccountItem) (err error) {
 	}
 	return nil
 }
+
+func (c SwapAccountConfig) Del(key string) (err error) {
+	err = redisDB.HDel(context.Background(), c.RdsName(), key).Err()
+	if err != nil {
+		return
+	}
+	return nil
+}
+
 func (c SwapAccountConfig) SetFreeBalance(key string, amount float64) (err error) {
 
 	vals, err := c.Get(key)
