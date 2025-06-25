@@ -65,3 +65,15 @@ func PublishToHedgeSchema(input []byte) error {
 			Body:        input,
 		})
 }
+
+func PublishToFundingHedgeSchema(input []byte) error {
+	return schemaCh.Publish(
+		"funding_hedge_schema_config", // exchange
+		"",                            // routing key
+		false,                         // mandatory
+		false,                         // immediate
+		amqp091.Publishing{
+			ContentType: "application/json",
+			Body:        input,
+		})
+}
