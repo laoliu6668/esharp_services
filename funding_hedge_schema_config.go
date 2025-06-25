@@ -23,19 +23,19 @@ type FundingHedgeSchemaItem struct {
 
 	LongExchange      string `json:"long_exchange"`      // c 多仓交易所
 	LongType          string `json:"long_type"`          // c 多仓类型: spot-现货合约 swap-永续合约
-	LongSymbolConfigs any    `json:"long_symbol_config"` // c 多仓币对配置
+	LongSymbolConfigs string `json:"long_symbol_config"` // c 多仓币对配置
 
 	ShortExchange      string `json:"short_exchange"`       // c 空仓交易所
 	ShortType          string `json:"short_type"`           // c 空仓类型: swap-永续合约
-	ShortSymbolConfigs any    `json:"short_symbol_configs"` // c 空仓币对配置
+	ShortSymbolConfigs string `json:"short_symbol_configs"` // c 空仓币对配置
 	// group end 币对配置
-	OpenRate           float64 `json:"open_rate"`             // * 开仓差率
-	CloseRate          float64 `json:"close_rate"`            // * 平仓差率
-	PositionValueLimit float64 `json:"position_value_limit"`  // * 空仓仓位持仓金额
-	SingleOrderValue   float64 `json:"single_order_value"`    // * 空仓订单单笔金额(预计)
-	MinOrderVolumeRate float64 `json:"min_order_volume_rate"` // * 最小下单量比 default:50(%)
+	OpenRate                float64 `json:"open_rate"`                  // * 开仓差率
+	CloseRate               float64 `json:"close_rate"`                 // * 平仓差率
+	ShortPositionValueLimit float64 `json:"short_position_value_limit"` // * 空仓仓位持仓金额
+	SingleOrderValue        float64 `json:"single_order_value"`         // * 空仓订单单笔金额(预计)
+	MinOrderVolumeRate      float64 `json:"min_order_volume_rate"`      // * 最小下单量比 default:50(%)
 
-	Totals any `json:"totals"` // 统计信息
+	Totals string `json:"totals"` // 统计信息
 
 	CreatedAt int64 `json:"created_at"` // 创建时间
 }
@@ -108,8 +108,10 @@ func (c FundingHedgeSchemaConfig) Add(long_exchange, long_type, short_exchange, 
 	c.set(long_exchange, short_exchange, symbol, "short_exchange", short_exchange)
 	c.set(long_exchange, short_exchange, symbol, "long_type", long_type)
 	c.set(long_exchange, short_exchange, symbol, "short_type", short_type)
-	c.setObject(long_exchange, short_exchange, symbol, "long_symbol_configs", longExchangeSymbolConfig)
-	c.setObject(long_exchange, short_exchange, symbol, "short_symbol_configs", shortExchangeSymbolConfig)
+	longExchangeSymbolConfigString, _ := json.Marshal(longExchangeSymbolConfig)
+	c.set(long_exchange, short_exchange, symbol, "long_symbol_configs", string(longExchangeSymbolConfigString))
+	shortExchangeSymbolConfigString, _ := json.Marshal(shortExchangeSymbolConfig)
+	c.set(long_exchange, short_exchange, symbol, "short_symbol_configs", string(shortExchangeSymbolConfigString))
 	// default value
 	c.setBool(long_exchange, short_exchange, symbol, "status", false)
 	c.setBool(long_exchange, short_exchange, symbol, "open_lock", false)
@@ -131,11 +133,11 @@ func (c FundingHedgeSchemaConfig) Add(long_exchange, long_type, short_exchange, 
 				Id:                id,
 				LongExchange:      long_exchange,
 				LongType:          long_type,
-				LongSymbolConfigs: longExchangeSymbolConfig,
+				LongSymbolConfigs: string(longExchangeSymbolConfigString),
 
 				ShortExchange:      short_exchange,
 				ShortType:          short_type,
-				ShortSymbolConfigs: shortExchangeSymbolConfig,
+				ShortSymbolConfigs: string(shortExchangeSymbolConfigString),
 
 				Symbol: symbol,
 
